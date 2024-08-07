@@ -7,75 +7,89 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct UserView: View {
+    
+    @State var selectedTab = 0
+    
+    var userName: String
+    var userInitials: String
+    var userActivities: [String]
+    
     var body: some View {
-        Spacer()
         
-       // Bottom navigation bar
-        HStack{
-            VStack{
-                Button(action: {
-                    //TODO: Action
-                }) {
-                    Image(systemName: "house.fill")
-                        .font(.system(size: 24))
-                        .padding()
+        VStack{
+            // User Profile Initial
+            HStack{
+                Circle().fill(Color.gray)
+                    .frame(width: 50, height: 50)
+                    .overlay(Text(userInitials).foregroundColor(.white))
+                
+                // User Profile Name
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(userName).font(.title)
+                    HStack(){
+                        ForEach(userActivities, id: \.self){
+                            activity in Text(activity).font(.subheadline).foregroundColor(.secondary)
+                        }
+                    }
                 }
-                Text("Home")
-                    .font(.caption)
-                    .foregroundColor(.black)
+                    
+                Spacer()
+                
             }
+        } .padding()
+        
+        Divider()
+        
+        TabView(selection: $selectedTab){
+            HomeView()
+                .tabItem{
+                    Label("Home", systemImage: "house")
+                }.tag(0)
             
-            Spacer()
+            ToolsView().tabItem{
+                Label("Tools", systemImage: "square.grid.3x3.fill")
+            }.tag(1)
             
-            VStack{
-                Button(action: {
-                    //TODO: Action
-                }) {
-                    Image(systemName: "square.grid.3x3.fill")
-                        .font(.system(size: 24))
-                        .padding()
-                }
-                Text("Tools")
-                    .font(.caption)
-                    .foregroundColor(.black)
-            }
+            MessagesView().tabItem{
+                Label("Messages", systemImage: "message")
+            }.tag(2)
             
-            Spacer()
-            
-            VStack{
-                Button(action: {
-                    //TODO: Action
-                }) {
-                    Image(systemName: "message.fill")
-                        .font(.system(size: 24))
-                        .padding()
-                }
-                Text("Messages")
-                    .font(.caption)
-                    .foregroundColor(.black)
-            }
-            
-            Spacer()
-            
-            VStack{
-                Button(action: {
-                    //TODO: Action
-                }) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 24))
-                        .padding()
-                }
-                Text("Settings")
-                    .font(.caption)
-                    .foregroundColor(.black)
-            }
+            SettingsView().tabItem{
+                Label("Settings", systemImage: "gearshape")
+            }.tag(3)
+
         }
-        .padding()
-        .background(Color(UIColor.systemGray6))
     }
 }
 
-#Preview {
-    ContentView()
+struct HomeView: View {
+    var body: some View {
+        Text("You have no activities\nJoin some teams, and tournaments")
+                .multilineTextAlignment(.center).padding()
+    }
+}
+
+struct ToolsView: View {
+    var body: some View {
+        Text("ToolsView")
+    }
+}
+
+struct MessagesView: View {
+    var body: some View {
+        Text("MessagesView")
+    }
+}
+
+struct SettingsView: View {
+    var body: some View {
+        Text("SettingsView")
+    }
+}
+
+struct ContentView: View {
+    var body: some View {
+        UserView(userName: "Carlson Jack", userInitials: "CJ", userActivities: ["Soccer", "Basketball"])
+    }
 }

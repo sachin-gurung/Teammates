@@ -49,12 +49,16 @@ struct UserView: View {
                     Label("Home", systemImage: "house")
                 }.tag(0)
             
-            ToolsView().tabItem{
-                Label("Tools", systemImage: "square.grid.3x3.fill")
+            GroupView().tabItem{
+                Label("Group", systemImage: "person.3")
             }.tag(1)
             
-            MessagesView().tabItem{
-                Label("Messages", systemImage: "message")
+            GamesView().tabItem{
+                Label("Games", systemImage: "figure.indoor.soccer")
+            }.tag(1)
+            
+            FieldsView().tabItem{
+                Label("Fields", systemImage: "sportscourt.fill")
             }.tag(2)
             
             SettingsView().tabItem{
@@ -72,7 +76,14 @@ struct HomeView: View {
     }
 }
 
-struct ToolsView: View {
+struct GroupView: View {
+    var body: some View {
+        Text("You have no groups\nCreate some groups")
+            .multilineTextAlignment(.center).padding()
+    }
+}
+
+struct GamesView: View {
     var body: some View {
         NavigationView{
             VStack(alignment: .leading, spacing: 20) {
@@ -135,9 +146,9 @@ struct ToolsView: View {
     }
 }
 
-struct MessagesView: View {
+struct FieldsView: View {
     var body: some View {
-        Text("MessagesView")
+        Text("FieldsView")
     }
 }
 
@@ -275,14 +286,14 @@ struct ManageFieldView: View{
     }
 }
 
-struct FieldsView: View{
-    var body: some View{
-        Text("Fields View")
-            .font(.largeTitle)
-            .navigationTitle("Fields")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
+//struct FieldsView: View{
+//    var body: some View{
+//        Text("Fields View")
+//            .font(.largeTitle)
+//            .navigationTitle("Fields")
+//            .navigationBarTitleDisplayMode(.inline)
+//    }
+//}
 
 struct TeamView: View{
     var body: some View{
@@ -302,13 +313,13 @@ struct ClubView: View{
     }
 }
 
-struct GroupView: View{
-    var body: some View{
-        Text("Group View")
-            .font(.largeTitle)
-            .navigationTitle("Group")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
+//struct GroupView: View{
+//    var body: some View{
+//        Text("Group View")
+//            .font(.largeTitle)
+//            .navigationTitle("Group")
+//            .navigationBarTitleDisplayMode(.inline)
+//    }
+//}
 
 

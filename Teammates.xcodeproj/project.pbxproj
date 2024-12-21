@@ -3,11 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8603D2F12D14DB0E00BD8CD3 /* GoogleService-Info-dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8603D2F02D14DB0E00BD8CD3 /* GoogleService-Info-dev.plist */; };
 		8682FB902C5983BB00F0BF4D /* TeammatesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8682FB8F2C5983BB00F0BF4D /* TeammatesApp.swift */; };
 		8682FB922C5983BB00F0BF4D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8682FB912C5983BB00F0BF4D /* ContentView.swift */; };
 		8682FB942C5983BE00F0BF4D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8682FB932C5983BE00F0BF4D /* Assets.xcassets */; };
@@ -15,18 +14,19 @@
 		869097762CFF59DB00068E4A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 869097752CFF59DB00068E4A /* FirebaseAuth */; };
 		86FEE8C22CFA65F50010A1F4 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 86FEE8C12CFA65F50010A1F4 /* FirebaseAnalytics */; };
 		86FEE8C42CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 86FEE8C32CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport */; };
-		86FEE8C62CFA67070010A1F4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 86FEE8C52CFA67070010A1F4 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8603D2F02D14DB0E00BD8CD3 /* GoogleService-Info-dev.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-dev.plist"; sourceTree = "<group>"; };
 		8682FB8C2C5983BB00F0BF4D /* Teammates.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teammates.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8682FB8F2C5983BB00F0BF4D /* TeammatesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeammatesApp.swift; sourceTree = "<group>"; };
 		8682FB912C5983BB00F0BF4D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8682FB932C5983BE00F0BF4D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8682FB962C5983BE00F0BF4D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		86FEE8C52CFA67070010A1F4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		8603D2F22D16811400BD8CD3 /* FireBaseConfigs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FireBaseConfigs; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8682FB892C5983BB00F0BF4D /* Frameworks */ = {
@@ -62,8 +62,7 @@
 		8682FB8E2C5983BB00F0BF4D /* Teammates */ = {
 			isa = PBXGroup;
 			children = (
-				86FEE8C52CFA67070010A1F4 /* GoogleService-Info.plist */,
-				8603D2F02D14DB0E00BD8CD3 /* GoogleService-Info-dev.plist */,
+				8603D2F22D16811400BD8CD3 /* FireBaseConfigs */,
 				8682FB8F2C5983BB00F0BF4D /* TeammatesApp.swift */,
 				8682FB912C5983BB00F0BF4D /* ContentView.swift */,
 				8682FB932C5983BE00F0BF4D /* Assets.xcassets */,
@@ -101,6 +100,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				8603D2F22D16811400BD8CD3 /* FireBaseConfigs */,
 			);
 			name = Teammates;
 			productName = Teammates;
@@ -149,8 +151,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8682FB972C5983BE00F0BF4D /* Preview Assets.xcassets in Resources */,
-				8603D2F12D14DB0E00BD8CD3 /* GoogleService-Info-dev.plist in Resources */,
-				86FEE8C62CFA67070010A1F4 /* GoogleService-Info.plist in Resources */,
 				8682FB942C5983BE00F0BF4D /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

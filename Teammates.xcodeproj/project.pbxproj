@@ -12,6 +12,10 @@
 		8682FB942C5983BE00F0BF4D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8682FB932C5983BE00F0BF4D /* Assets.xcassets */; };
 		8682FB972C5983BE00F0BF4D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8682FB962C5983BE00F0BF4D /* Preview Assets.xcassets */; };
 		869097762CFF59DB00068E4A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 869097752CFF59DB00068E4A /* FirebaseAuth */; };
+		86DEBD442D1E8A5700EFD5E2 /* HomeView in Frameworks */ = {isa = PBXBuildFile; productRef = 86DEBD432D1E8A5700EFD5E2 /* HomeView */; };
+		86DEBD4E2D1E8D1D00EFD5E2 /* GroupView in Frameworks */ = {isa = PBXBuildFile; productRef = 86DEBD4D2D1E8D1D00EFD5E2 /* GroupView */; };
+		86DEBD532D1E920C00EFD5E2 /* GamesView in Frameworks */ = {isa = PBXBuildFile; productRef = 86DEBD522D1E920C00EFD5E2 /* GamesView */; };
+		86DEBD5A2D1E948D00EFD5E2 /* SettingsView in Frameworks */ = {isa = PBXBuildFile; productRef = 86DEBD592D1E948D00EFD5E2 /* SettingsView */; };
 		86FEE8C22CFA65F50010A1F4 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 86FEE8C12CFA65F50010A1F4 /* FirebaseAnalytics */; };
 		86FEE8C42CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 86FEE8C32CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport */; };
 /* End PBXBuildFile section */
@@ -26,6 +30,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8603D2F22D16811400BD8CD3 /* FireBaseConfigs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FireBaseConfigs; sourceTree = "<group>"; };
+		86DEBD492D1E8C1800EFD5E2 /* modules */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = modules; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,9 +38,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86DEBD4E2D1E8D1D00EFD5E2 /* GroupView in Frameworks */,
+				86DEBD442D1E8A5700EFD5E2 /* HomeView in Frameworks */,
+				86DEBD5A2D1E948D00EFD5E2 /* SettingsView in Frameworks */,
 				86FEE8C22CFA65F50010A1F4 /* FirebaseAnalytics in Frameworks */,
 				869097762CFF59DB00068E4A /* FirebaseAuth in Frameworks */,
 				86FEE8C42CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
+				86DEBD532D1E920C00EFD5E2 /* GamesView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,6 +54,7 @@
 		8682FB832C5983BB00F0BF4D = {
 			isa = PBXGroup;
 			children = (
+				86DEBD492D1E8C1800EFD5E2 /* modules */,
 				8682FB8E2C5983BB00F0BF4D /* Teammates */,
 				869097742CFF59DB00068E4A /* Frameworks */,
 				8682FB8D2C5983BB00F0BF4D /* Products */,
@@ -386,6 +396,22 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 86FEE8C02CFA65F50010A1F4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		86DEBD432D1E8A5700EFD5E2 /* HomeView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HomeView;
+		};
+		86DEBD4D2D1E8D1D00EFD5E2 /* GroupView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GroupView;
+		};
+		86DEBD522D1E920C00EFD5E2 /* GamesView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GamesView;
+		};
+		86DEBD592D1E948D00EFD5E2 /* SettingsView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SettingsView;
 		};
 		86FEE8C12CFA65F50010A1F4 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;

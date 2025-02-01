@@ -173,23 +173,6 @@ public struct TournamentPageView: View{
     }
 }
 
-public struct FieldsView: View {
-    public init () {
-        
-    }
-    public var body: some View {
-        Text("FieldsView")
-    }
-}
-
-public struct GroupView: View {
-    
-    public var body: some View {
-        Text("You have no groups\nCreate some groups")
-            .multilineTextAlignment(.center).padding()
-    }
-}
-
 public struct FloatingAddButton: View {
     var action: () -> Void
     

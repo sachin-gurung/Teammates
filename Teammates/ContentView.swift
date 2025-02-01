@@ -6,10 +6,6 @@
 //
 
 import SwiftUI
-import HomeView
-import GroupView
-import GamesView
-import SettingsView
 
 struct UserView: View {
     
@@ -57,17 +53,21 @@ struct UserView: View {
                 Label("Group", systemImage: "person.3")
             }.tag(1)
             
+//            GamesView().tabItem{
+//                Label("Games", systemImage: "figure.indoor.soccer")
+//            }.tag(2)
+            
             GamesView().tabItem{
                 Label("Games", systemImage: "figure.indoor.soccer")
-            }.tag(1)
+            }.tag(2)
             
             FieldsView().tabItem{
                 Label("Fields", systemImage: "sportscourt.fill")
-            }.tag(2)
+            }.tag(3)
             
             SettingsView().tabItem{
                 Label("Settings", systemImage: "gearshape")
-            }.tag(3)
+            }.tag(4)
         }
         .background(Color(.systemGray6))
     }

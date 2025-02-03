@@ -12,9 +12,35 @@
 		8682FB942C5983BE00F0BF4D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8682FB932C5983BE00F0BF4D /* Assets.xcassets */; };
 		8682FB972C5983BE00F0BF4D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8682FB962C5983BE00F0BF4D /* Preview Assets.xcassets */; };
 		869097762CFF59DB00068E4A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 869097752CFF59DB00068E4A /* FirebaseAuth */; };
+		86BCD9672D4F30D0005D8F55 /* corelibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86BCD95F2D4F30D0005D8F55 /* corelibrary.framework */; };
+		86BCD9682D4F30D0005D8F55 /* corelibrary.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 86BCD95F2D4F30D0005D8F55 /* corelibrary.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		86FEE8C22CFA65F50010A1F4 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 86FEE8C12CFA65F50010A1F4 /* FirebaseAnalytics */; };
 		86FEE8C42CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 86FEE8C32CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		86BCD9652D4F30D0005D8F55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8682FB842C5983BB00F0BF4D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 86BCD95E2D4F30D0005D8F55;
+			remoteInfo = corelibrary;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		86BCD96D2D4F30D0005D8F55 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				86BCD9682D4F30D0005D8F55 /* corelibrary.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8682FB8C2C5983BB00F0BF4D /* Teammates.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teammates.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -22,24 +48,36 @@
 		8682FB912C5983BB00F0BF4D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8682FB932C5983BE00F0BF4D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8682FB962C5983BE00F0BF4D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		86BCD95F2D4F30D0005D8F55 /* corelibrary.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = corelibrary.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		86BCD96E2D511573005D8F55 /* Teammates.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Teammates.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		86BCD8C62D4E866E005D8F55 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				backend/AuthenticationViewModel.swift,
 				designsystem/FieldsView.swift,
 				designsystem/GamesView.swift,
 				designsystem/GroupView.swift,
 				designsystem/HomeView.swift,
+				designsystem/LoginView.swift,
 				designsystem/SettingsView.swift,
 			);
 			target = 8682FB8B2C5983BB00F0BF4D /* Teammates */;
+		};
+		86BCD96C2D4F30D0005D8F55 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			publicHeaders = (
+				corelibrary.h,
+			);
+			target = 86BCD95E2D4F30D0005D8F55 /* corelibrary */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8603D2F22D16811400BD8CD3 /* FireBaseConfigs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FireBaseConfigs; sourceTree = "<group>"; };
+		86BCD9602D4F30D0005D8F55 /* corelibrary */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (86BCD96C2D4F30D0005D8F55 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = corelibrary; sourceTree = "<group>"; };
 		86DEBD492D1E8C1800EFD5E2 /* modules */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (86BCD8C62D4E866E005D8F55 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = modules; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -51,6 +89,14 @@
 				86FEE8C22CFA65F50010A1F4 /* FirebaseAnalytics in Frameworks */,
 				869097762CFF59DB00068E4A /* FirebaseAuth in Frameworks */,
 				86FEE8C42CFA65F50010A1F4 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
+				86BCD9672D4F30D0005D8F55 /* corelibrary.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86BCD95C2D4F30D0005D8F55 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,6 +108,7 @@
 			children = (
 				86DEBD492D1E8C1800EFD5E2 /* modules */,
 				8682FB8E2C5983BB00F0BF4D /* Teammates */,
+				86BCD9602D4F30D0005D8F55 /* corelibrary */,
 				869097742CFF59DB00068E4A /* Frameworks */,
 				8682FB8D2C5983BB00F0BF4D /* Products */,
 			);
@@ -71,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				8682FB8C2C5983BB00F0BF4D /* Teammates.app */,
+				86BCD95F2D4F30D0005D8F55 /* corelibrary.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -78,6 +126,7 @@
 		8682FB8E2C5983BB00F0BF4D /* Teammates */ = {
 			isa = PBXGroup;
 			children = (
+				86BCD96E2D511573005D8F55 /* Teammates.entitlements */,
 				8603D2F22D16811400BD8CD3 /* FireBaseConfigs */,
 				8682FB8F2C5983BB00F0BF4D /* TeammatesApp.swift */,
 				8682FB912C5983BB00F0BF4D /* ContentView.swift */,
@@ -104,6 +153,16 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		86BCD95A2D4F30D0005D8F55 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		8682FB8B2C5983BB00F0BF4D /* Teammates */ = {
 			isa = PBXNativeTarget;
@@ -112,10 +171,12 @@
 				8682FB882C5983BB00F0BF4D /* Sources */,
 				8682FB892C5983BB00F0BF4D /* Frameworks */,
 				8682FB8A2C5983BB00F0BF4D /* Resources */,
+				86BCD96D2D4F30D0005D8F55 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				86BCD9662D4F30D0005D8F55 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				8603D2F22D16811400BD8CD3 /* FireBaseConfigs */,
@@ -124,6 +185,29 @@
 			productName = Teammates;
 			productReference = 8682FB8C2C5983BB00F0BF4D /* Teammates.app */;
 			productType = "com.apple.product-type.application";
+		};
+		86BCD95E2D4F30D0005D8F55 /* corelibrary */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86BCD9692D4F30D0005D8F55 /* Build configuration list for PBXNativeTarget "corelibrary" */;
+			buildPhases = (
+				86BCD95A2D4F30D0005D8F55 /* Headers */,
+				86BCD95B2D4F30D0005D8F55 /* Sources */,
+				86BCD95C2D4F30D0005D8F55 /* Frameworks */,
+				86BCD95D2D4F30D0005D8F55 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				86BCD9602D4F30D0005D8F55 /* corelibrary */,
+			);
+			name = corelibrary;
+			packageProductDependencies = (
+			);
+			productName = corelibrary;
+			productReference = 86BCD95F2D4F30D0005D8F55 /* corelibrary.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -137,6 +221,9 @@
 				TargetAttributes = {
 					8682FB8B2C5983BB00F0BF4D = {
 						CreatedOnToolsVersion = 15.3;
+					};
+					86BCD95E2D4F30D0005D8F55 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -157,6 +244,7 @@
 			projectRoot = "";
 			targets = (
 				8682FB8B2C5983BB00F0BF4D /* Teammates */,
+				86BCD95E2D4F30D0005D8F55 /* corelibrary */,
 			);
 		};
 /* End PBXProject section */
@@ -168,6 +256,13 @@
 			files = (
 				8682FB972C5983BE00F0BF4D /* Preview Assets.xcassets in Resources */,
 				8682FB942C5983BE00F0BF4D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86BCD95D2D4F30D0005D8F55 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,7 +278,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		86BCD95B2D4F30D0005D8F55 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		86BCD9662D4F30D0005D8F55 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 86BCD95E2D4F30D0005D8F55 /* corelibrary */;
+			targetProxy = 86BCD9652D4F30D0005D8F55 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		8682FB982C5983BE00F0BF4D /* Debug */ = {
@@ -310,6 +420,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Teammates/Teammates.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Teammates/Preview Content\"";
@@ -339,6 +450,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Teammates/Teammates.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Teammates/Preview Content\"";
@@ -363,6 +475,78 @@
 			};
 			name = Release;
 		};
+		86BCD96A2D4F30D0005D8F55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = NJPBMLUKW5;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sachin.corelibrary;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		86BCD96B2D4F30D0005D8F55 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = NJPBMLUKW5;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sachin.corelibrary;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -380,6 +564,15 @@
 			buildConfigurations = (
 				8682FB9B2C5983BE00F0BF4D /* Debug */,
 				8682FB9C2C5983BE00F0BF4D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		86BCD9692D4F30D0005D8F55 /* Build configuration list for PBXNativeTarget "corelibrary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86BCD96A2D4F30D0005D8F55 /* Debug */,
+				86BCD96B2D4F30D0005D8F55 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

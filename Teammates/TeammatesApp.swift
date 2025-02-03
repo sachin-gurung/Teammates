@@ -21,6 +21,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct TeammatesApp: App {
+    @StateObject private var authViewModel = AuthenticationViewModel();
+    
     init(){
         // Determine the correct configuration file
         let isDev = Bundle.main.bundleIdentifier?.contains("dev") ?? false
@@ -34,13 +36,16 @@ struct TeammatesApp: App {
             fatalError("Could not load \(configFileName).plist")
         }
     }
-    
-//    // register app delegate for Firebase setup
-//    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if authViewModel.authenticationState == .authenticated {
+                ContentView()
+                    .environmentObject(authViewModel)
+            } else {
+                LoginView()
+                    .environmentObject(authViewModel)
+            }
         }
     }
 }

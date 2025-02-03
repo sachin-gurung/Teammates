@@ -3,9 +3,28 @@
 import SwiftUI
 
 public struct SettingsView: View {
-    public init(){}
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
     
     public var body: some View {
-        Text("SettingsView")
+        NavigationView{
+            VStack{
+                Text ("Settings View")
+                
+                Spacer()
+                
+                Button(action: {
+                    authViewModel.signOut()
+                }) {
+                    Text("Sign Out")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.red)
+                        .cornerRadius(10)
+                }
+                .padding()
+            }
+        }
     }
 }

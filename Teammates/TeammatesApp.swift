@@ -36,16 +36,16 @@ struct TeammatesApp: App {
             fatalError("Could not load \(configFileName).plist")
         }
     }
-
     var body: some Scene {
         WindowGroup {
             if authViewModel.authenticationState == .authenticated {
                 ContentView()
                     .environmentObject(authViewModel)
             } else {
-                LoginView()
+                LoginView(type: "guest", code: "NA")
                     .environmentObject(authViewModel)
             }
         }
     }
 }
+

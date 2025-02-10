@@ -11,127 +11,131 @@ import FirebaseAnalytics
 import AuthenticationServices
 
 private enum FocusableField: Hashable {
-  case email
-  case password
+    case email
+    case password
 }
 
 struct LoginView: View {
-  @EnvironmentObject var viewModel: AuthenticationViewModel
-  @Environment(\.colorScheme) var colorScheme
-  @Environment(\.dismiss) var dismiss
+    var type: String
+    var code: String
 
-  @FocusState private var focus: FocusableField?
+    @EnvironmentObject var viewModel: AuthenticationViewModel
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var dismiss
 
-  private func signInWithEmailPassword() {
-    Task {
-      if await viewModel.signInWithEmailPassword() == true {
-        dismiss()
-      }
+    @FocusState private var focus: FocusableField?
+
+    private func signInWithEmailPassword() {
+        Task {
+            if await viewModel.signInWithEmailPassword() == true {
+                dismiss()
+            }
+        }
     }
-  }
 
-  var body: some View {
-    VStack {
-      Image("Login")
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(minHeight: 300, maxHeight: 400)
-      Text("Login")
-        .font(.largeTitle)
-        .fontWeight(.bold)
-        .frame(maxWidth: .infinity, alignment: .leading)
-
-      HStack {
-        Image(systemName: "at")
-        TextField("Email", text: $viewModel.email)
-          .textInputAutocapitalization(.never)
-          .disableAutocorrection(true)
-          .focused($focus, equals: .email)
-          .submitLabel(.next)
-          .onSubmit {
-            self.focus = .password
-          }
-      }
-      .padding(.vertical, 6)
-      .background(Divider(), alignment: .bottom)
-      .padding(.bottom, 4)
-
-      HStack {
-        Image(systemName: "lock")
-        SecureField("Password", text: $viewModel.password)
-          .focused($focus, equals: .password)
-          .submitLabel(.go)
-          .onSubmit {
-            signInWithEmailPassword()
-          }
-      }
-      .padding(.vertical, 6)
-      .background(Divider(), alignment: .bottom)
-      .padding(.bottom, 8)
-
-      if !viewModel.errorMessage.isEmpty {
+    var body: some View {
         VStack {
-          Text(viewModel.errorMessage)
-            .foregroundColor(Color(UIColor.systemRed))
-        }
-      }
+            Image("Login")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(minHeight: 300, maxHeight: 400)
+            
+            Text("Login")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-      Button(action: signInWithEmailPassword) {
-        if viewModel.authenticationState != .authenticating {
-          Text("Login")
-            .padding(.vertical, 8)
+            HStack {
+                Image(systemName: "at")
+                TextField("Email", text: $viewModel.email)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .focused($focus, equals: .email)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        self.focus = .password
+                    }
+            }
+            .padding(.vertical, 6)
+            .background(Divider(), alignment: .bottom)
+            .padding(.bottom, 4)
+
+            HStack {
+                Image(systemName: "lock")
+                SecureField("Password", text: $viewModel.password)
+                    .focused($focus, equals: .password)
+                    .submitLabel(.go)
+                    .onSubmit {
+                        signInWithEmailPassword()
+                    }
+            }
+            .padding(.vertical, 6)
+            .background(Divider(), alignment: .bottom)
+            .padding(.bottom, 8)
+
+            if !viewModel.errorMessage.isEmpty {
+                VStack {
+                    Text(viewModel.errorMessage)
+                        .foregroundColor(Color(UIColor.systemRed))
+                }
+            }
+
+            Button(action: signInWithEmailPassword) {
+                if viewModel.authenticationState != .authenticating {
+                    Text("Login")
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                } else {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .disabled(!viewModel.isValid)
             .frame(maxWidth: .infinity)
-        }
-        else {
-          ProgressView()
-            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-            .padding(.vertical, 8)
-            .frame(maxWidth: .infinity)
-        }
-      }
-      .disabled(!viewModel.isValid)
-      .frame(maxWidth: .infinity)
-      .buttonStyle(.borderedProminent)
+            .buttonStyle(.borderedProminent)
 
-      HStack {
-        VStack { Divider() }
-        Text("or")
-        VStack { Divider() }
-      }
-      
-      SignInWithAppleButton(.signIn) { request in
-        viewModel.handleSignInWithAppleRequest(request)
-      } onCompletion: { result in
-        viewModel.handleSignInWithAppleCompletion(result)
-      }
-      .signInWithAppleButtonStyle(colorScheme == .light ? .black : .white)
-      .frame(maxWidth: .infinity, minHeight: 50)
-      .cornerRadius(8)
+            HStack {
+                VStack { Divider() }
+                Text("or")
+                VStack { Divider() }
+            }
 
-      HStack {
-        Text("Don't have an account yet?")
-        Button(action: { viewModel.switchFlow() }) {
-          Text("Sign up")
-            .fontWeight(.semibold)
-            .foregroundColor(.blue)
+            SignInWithAppleButton(.signIn) { request in
+                viewModel.handleSignInWithAppleRequest(request)
+            } onCompletion: { result in
+                viewModel.handleSignInWithAppleCompletion(result)
+            }
+            .signInWithAppleButtonStyle(colorScheme == .light ? .black : .white)
+            .frame(maxWidth: .infinity, minHeight: 50)
+            .cornerRadius(8)
+
+            HStack {
+                Text("Don't have an account yet?")
+                Button(action: { viewModel.switchFlow() }) {
+                    Text("Sign up")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding([.top, .bottom], 50)
         }
-      }
-      .padding([.top, .bottom], 50)
-
+        .listStyle(.plain)
+        .padding()
+        .analyticsScreen(name: "\(Self.self)")
     }
-    .listStyle(.plain)
-    .padding()
-    .analyticsScreen(name: "\(Self.self)")
-  }
 }
 
 struct LoginView_Previews: PreviewProvider {
-  static var previews: some View {
-    Group {
-      LoginView()
-      LoginView()
-        .preferredColorScheme(.dark)
+    static var previews: some View {
+        let viewModel = AuthenticationViewModel()
+
+        LoginView(type: "string", code: "string")
+            .environmentObject(viewModel)
+
+        LoginView(type: "string", code: "string")
+            .preferredColorScheme(.dark)
+            .environmentObject(viewModel)
     }
-    .environmentObject(AuthenticationViewModel())
-  }
 }

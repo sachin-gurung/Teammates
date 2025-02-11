@@ -22,6 +22,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct TeammatesApp: App {
     @StateObject private var authViewModel = AuthenticationViewModel();
+    @StateObject var store = GroupStore()
+    @State private var showFeedback = false
     
     init(){
         // Determine the correct configuration file
@@ -38,12 +40,15 @@ struct TeammatesApp: App {
     }
     var body: some Scene {
         WindowGroup {
-            if authViewModel.authenticationState == .authenticated {
-                ContentView()
-                    .environmentObject(authViewModel)
-            } else {
-                LoginView(type: "guest", code: "NA")
-                    .environmentObject(authViewModel)
+            ZStack {
+                if authViewModel.authenticationState == .authenticated {
+                    ContentView()
+                        .environmentObject(authViewModel)
+                        .environmentObject(store) // Ensuring GroupStore is available globally
+                } else {
+                    LoginView(type: "guest", code: "NA")
+                        .environmentObject(authViewModel)
+                }
             }
         }
     }

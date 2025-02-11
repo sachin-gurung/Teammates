@@ -1,5 +1,5 @@
 //
-//  LOginView.swift
+//  LoginView.swift
 //  Teammates
 //
 //  Created by Sachin Gurung on 2/1/25.

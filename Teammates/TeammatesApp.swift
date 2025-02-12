@@ -24,6 +24,7 @@ struct TeammatesApp: App {
     @StateObject private var authViewModel = AuthenticationViewModel();
     @StateObject var store = GroupStore()
     @State private var showFeedback = false
+    @StateObject var motionManager = MotionManager() // Add MotionManager
     
     init(){
         // Determine the correct configuration file
@@ -49,6 +50,15 @@ struct TeammatesApp: App {
                     LoginView(type: "guest", code: "NA")
                         .environmentObject(authViewModel)
                 }
+            }
+            .onChange(of: motionManager.didShake) { newValue in
+                if newValue {
+                    showFeedback = true
+                    motionManager.didShake = false // Reset shake detection
+                }
+            }
+            .sheet(isPresented: $showFeedback) {
+                FeedbackView()
             }
         }
     }

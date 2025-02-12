@@ -58,6 +58,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				backend/AuthenticationViewModel.swift,
+				backend/MotionManager.swift,
 				designsystem/FeedbackView.swift,
 				designsystem/FieldsView.swift,
 				designsystem/GamesView.swift,

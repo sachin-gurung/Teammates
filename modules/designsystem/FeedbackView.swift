@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
 
 struct FeedbackView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var feedbackText = ""
+    @State private var isSubmitting = false
+    @State private var showSuccessAlert = false
     
     var body: some View {
         NavigationView {
@@ -23,29 +27,73 @@ struct FeedbackView: View {
                     .border(Color.gray, width: 1)
                     .padding()
                 
-                Button(action: {
-                    submitFeedback()
-                    presentationMode.wrappedValue.dismiss() // Close the view
-                }) {
-                    Text("Submit")
+                if isSubmitting {
+                    ProgressView("Submitting...") // Show progress indicator
                         .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                        .padding()
+                } else {
+                    Button(action: submitFeedback) {
+                        Text("Submit")
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                            .padding()
+                    }
                 }
             }
             .navigationBarTitle("Feedback Form", displayMode: .inline)
             .navigationBarItems(trailing: Button("Close") {
                 presentationMode.wrappedValue.dismiss()
             })
+            .alert(isPresented: $showSuccessAlert) {
+                Alert(title: Text("Success"), message: Text("Your feedback has been submitted!"), dismissButton: .default(Text("Close"), action: {
+                    presentationMode.wrappedValue.dismiss() // Close after success
+                }))
+            }
         }
     }
     
     private func submitFeedback() {
-        // Send feedback to Firebase or another service
-        print("Feedback submitted: \(feedbackText)")
+        guard !feedbackText.isEmpty else {
+            return
+        }
+        
+        isSubmitting = true // Show loading state
+        
+        let db = Firestore.firestore()
+        let userId = Auth.auth().currentUser!.uid ?? "Anonymous"
+        
+        // Get the highest feedback ID and increment it
+        db.collection("feedbacks_1").order(by: "feedbackId", descending: true).limit(to: 1).getDocuments { snapshot, error in
+            var newFeedbackId = 1 // Default to 1 if no previous feedback exists
+            
+            if let documents = snapshot?.documents, let lastFeedback = documents.first {
+                if let lastFeedbackId = lastFeedback.data()["feedbackId"] as? Int {
+                    newFeedbackId = lastFeedbackId + 1
+                }
+            }
+            
+            // Feedback data
+            let feedbackData: [String: Any] = [
+                "feedbackId": newFeedbackId,
+                "userId": userId,
+                "feedback": feedbackText,
+                "timestamp": Timestamp(date: Date()) // Store the date
+                ]
+            
+            // Save feedback to Firestore
+            db.collection("feedbacks_1").addDocument(data: feedbackData) { error in
+                isSubmitting = false // Hide loading state
+                
+                if let error = error {
+                    print ("Error submitting feedback: \(error.localizedDescription)")
+                } else {
+                    print("Feedback submitted successfully with ID \(newFeedbackId)")
+                    showSuccessAlert = true // Show success alert
+                }
+            }
+        }
     }
 }
 

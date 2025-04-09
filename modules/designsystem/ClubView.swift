@@ -18,7 +18,7 @@
 import SwiftUI
 import FirebaseFirestore
 
-struct Group: Identifiable {
+struct Club: Identifiable {
     var id: String // Firestore document ID
     let name: String
     let type: String
@@ -31,7 +31,7 @@ struct Group: Identifiable {
 }
 
 final class GroupStore: ObservableObject {
-    @Published var groups: [Group] = []
+    @Published var groups: [Club] = []
     
     private let db = Firestore.firestore()
     private let collectionName = "groups_1"
@@ -50,7 +50,7 @@ final class GroupStore: ObservableObject {
             
             DispatchQueue.main.async {
                 self.groups.removeAll() // Clear existing groups befor updating
-                self.groups = documents.compactMap { doc -> Group? in
+                self.groups = documents.compactMap { doc -> Club? in
                     let data = doc.data()
                     return self.decodeGroup(id: doc.documentID, data: data)
                 }
@@ -62,7 +62,7 @@ final class GroupStore: ObservableObject {
     func addGroup(name: String, type: String) {
         let groupRef = db.collection(collectionName).document() // Generates unique Firestore ID
         let groupID = groupRef.documentID // Get the auto-generated ID
-        let newGroup = Group(id: groupID, name: name, type: type, code: generateSixCharacterCode(), memberCount: 1)
+        let newGroup = Club(id: groupID, name: name, type: type, code: generateSixCharacterCode(), memberCount: 1)
 
         let groupData: [String: Any] = [
             "id": groupID,
@@ -113,7 +113,7 @@ final class GroupStore: ObservableObject {
     }
     
     // Function to manually decode Firestore data into a Group object
-        private func decodeGroup(id: String, data: [String: Any]) -> Group? {
+        private func decodeGroup(id: String, data: [String: Any]) -> Club? {
             guard let firestoreId = data["id"] as? String,
                   let name = data["name"] as? String,
                   let type = data["type"] as? String,
@@ -122,7 +122,7 @@ final class GroupStore: ObservableObject {
                 return nil
             }
             
-            return Group(id: firestoreId, name: name, type: type, code: code, memberCount: memberCount)
+            return Club(id: firestoreId, name: name, type: type, code: code, memberCount: memberCount)
         }
 }
 
@@ -138,7 +138,7 @@ struct GroupView: View {
         NavigationStack {
             ZStack {
                 if store.groups.isEmpty && !showMenu {
-                    Text("You have no groups\nCreate some groups")
+                    Text("You have no clubs\nCreate some clubs")
                         .multilineTextAlignment(.center)
                         .padding()
                         .transition(.opacity)
@@ -146,19 +146,6 @@ struct GroupView: View {
                     GroupsListView()
                         .environmentObject(store)
                 }
-                
-//            ZStack {
-//                
-//                }
-//            .navigationTitle("Groups")
-//            .sheet(isPresented: $showFeedback) {
-//                FeedbackView()
-//            }
-//            .background(
-//                ShakeDetector {
-//                    showFeedback = true
-//                }
-//            )
                 
                 if showMenu {
                     VStack {
@@ -230,7 +217,6 @@ struct GroupView: View {
                     label: { EmptyView() }
                 )
             }
-            .navigationTitle("Groups")
             .sheet(isPresented: $showJoinSheet) {
                 JoinWithCodeView()
                     .environmentObject(store)
@@ -296,7 +282,7 @@ struct CreateGroupView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Create a New Group")
+            Text("Create New Club")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .padding(.bottom, 10)
@@ -484,7 +470,7 @@ struct CodeDigitTextField: View {
 }
 
 struct GroupRow: View {
-    var group: Group
+    var group: Club
     
     var body: some View {
         HStack {

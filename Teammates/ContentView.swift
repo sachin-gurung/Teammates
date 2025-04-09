@@ -7,77 +7,91 @@
 
 import SwiftUI
 
-struct UserView: View {
+struct ContentView: View {
     
     @State var selectedTab = 0
+    @State private var isMessageSheetPresented = false
+    @State private var isNotificationSheetPresented = false
     
-    var userName: String
-    var userInitials: String
-    var userActivities: [String]
+    
+    // Dummy profile data
+    let userName = "Carlson Jack"
+    let userInitials = "CJ"
+    let userActivities = ["Soccer 7 v 7", "Soccer 11 v 11"]
+    
+    var tabName: String {
+        switch selectedTab {
+        case 0:
+            return "Home"
+        case 1:
+            return "Clubs"
+        case 2:
+            return "Fixtures"
+        case 3:
+            return "Tools"
+        case 4:
+            return "Settings"
+        default:
+            return ""
+        }
+    }
+
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.systemGray4
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
     
     var body: some View {
-        ZStack{
-            VStack{
-                // User Profile Initial
-                HStack{
-                    Circle().fill(Color.gray)
-                        .frame(width: 50, height: 50)
-                        .overlay(Text(userInitials).foregroundColor(.white))
-                    
-                    // User Profile Name
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(userName).font(.title)
-                        HStack(){
-                            ForEach(userActivities, id: \.self){
-                                activity in Text(activity).font(.subheadline).foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                        
-                    Spacer()
-                    
-                }
-            } .padding()
+        VStack(spacing: 0){
+            // Header with Messages and Notifications
+            HeaderView(
+                tabName: tabName,
+                isMessageSheetPresented: $isMessageSheetPresented,
+                isNotificationSheetPresented: $isNotificationSheetPresented
+            )
             
+            Divider()
+            
+            TabView(selection: $selectedTab){
+                HomeView(
+                    userName: userName,
+                    userInitials: userInitials,
+                    userActivities: userActivities
+                )
+                    .tabItem{
+                        Label("Home", systemImage: "house")
+                    }.tag(0)
+                
+                GroupView().tabItem{
+                    Label("Clubs", systemImage: "person.3")
+                }.tag(1)
+                
+                GamesView().tabItem{
+                    Label("Fixtures", systemImage: "soccerball")
+                }.tag(2)
+                
+                ToolsView().tabItem{
+                    Label("Tools", systemImage: "wrench.and.screwdriver")
+                }.tag(3)
+                
+                SettingsView().tabItem{
+                    Label("Settings", systemImage: "gearshape")
+                }.tag(4)
+            }
         }
-       
-        Divider()
-        
-        TabView(selection: $selectedTab){
-            HomeView()
-                .tabItem{
-                    Label("Home", systemImage: "house")
-                }.tag(0)
-            
-            GroupView().tabItem{
-                Label("Group", systemImage: "person.3")
-            }.tag(1)
-            
-//            GamesView().tabItem{
-//                Label("Games", systemImage: "figure.indoor.soccer")
-//            }.tag(2)
-            
-            GamesView().tabItem{
-                Label("Games", systemImage: "figure.indoor.soccer")
-            }.tag(2)
-            
-            FieldsView().tabItem{
-                Label("Fields", systemImage: "sportscourt.fill")
-            }.tag(3)
-            
-            SettingsView().tabItem{
-                Label("Settings", systemImage: "gearshape")
-            }.tag(4)
+        .sheet(isPresented: $isMessageSheetPresented){
+            MessageSheet()
         }
-        .background(Color(.systemGray6))
+        .sheet(isPresented: $isNotificationSheetPresented){
+            NotificationSheet()
+        }
     }
 }
 
-struct ContentView: View {
-    var body: some View {
-        UserView(userName: "Carlson Jack", userInitials: "CJ", userActivities: ["Soccer", "Basketball"])
-    }
-}
+
 
 
 

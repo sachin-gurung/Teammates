@@ -2,7 +2,7 @@
 // https://docs.swift.org/swift-book
 import SwiftUI
 
-public struct GamesView: View {
+public struct FixturesView: View {
     public init () {
         
     }
@@ -56,7 +56,7 @@ public struct GamesView: View {
                             ToolButton(title: "Club")
                         }
                         
-                        NavigationLink(destination: GroupView()){
+                        NavigationLink(destination: clubView()){
                             ToolButton(title: "Group")
                         }
                     }

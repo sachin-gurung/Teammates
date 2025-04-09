@@ -59,16 +59,16 @@
 			membershipExceptions = (
 				backend/AuthenticationViewModel.swift,
 				backend/MotionManager.swift,
-				designsystem/ClubView.swift,
-				designsystem/FeedbackView.swift,
-				designsystem/GamesView.swift,
-				designsystem/HeaderView.swift,
-				designsystem/HomeView.swift,
-				designsystem/LoginView.swift,
-				designsystem/MessageSheet.swift,
-				designsystem/NotificationSheet.swift,
-				designsystem/SettingsView.swift,
-				designsystem/ToolsView.swift,
+				designsystem/ClubsTab/ClubView.swift,
+				designsystem/Feedback/FeedbackView.swift,
+				designsystem/FixturesTab/FixturesView.swift,
+				designsystem/HomeTab/HeaderView.swift,
+				designsystem/HomeTab/HomeView.swift,
+				designsystem/HomeTab/MessageSheet.swift,
+				designsystem/HomeTab/NotificationSheet.swift,
+				designsystem/Login/LoginView.swift,
+				designsystem/SettingsTab/SettingsView.swift,
+				designsystem/ToolsTab/ToolsView.swift,
 			);
 			target = 8682FB8B2C5983BB00F0BF4D /* Teammates */;
 		};

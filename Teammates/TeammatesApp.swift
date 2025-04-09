@@ -22,7 +22,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct TeammatesApp: App {
     @StateObject private var authViewModel = AuthenticationViewModel();
-    @StateObject var store = GroupStore()
+    @StateObject var store = clubStore()
     @State private var showFeedback = false
     @StateObject var motionManager = MotionManager() // Add MotionManager
     

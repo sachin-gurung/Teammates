@@ -30,11 +30,11 @@ struct Club: Identifiable {
     }
 }
 
-final class GroupStore: ObservableObject {
+final class clubStore: ObservableObject {
     @Published var groups: [Club] = []
     
     private let db = Firestore.firestore()
-    private let collectionName = "groups_1"
+    private let collectionName = "clubs_1"
     
     init(){
         fetchGroups()
@@ -59,30 +59,30 @@ final class GroupStore: ObservableObject {
     }
     
      // Function to add a group to Firestore
-    func addGroup(name: String, type: String) {
-        let groupRef = db.collection(collectionName).document() // Generates unique Firestore ID
-        let groupID = groupRef.documentID // Get the auto-generated ID
-        let newGroup = Club(id: groupID, name: name, type: type, code: generateSixCharacterCode(), memberCount: 1)
+    func addClub(name: String, type: String) {
+        let clubRef = db.collection(collectionName).document() // Generates unique Firestore ID
+        let clubID = clubRef.documentID // Get the auto-generated ID
+        let newClub = Club(id: clubID, name: name, type: type, code: generateSixCharacterCode(), memberCount: 1)
 
-        let groupData: [String: Any] = [
-            "id": groupID,
-            "name": newGroup.name,
-            "type": newGroup.type,
-            "code": newGroup.code,
-            "memberCount": newGroup.memberCount
+        let clubData: [String: Any] = [
+            "id": clubID,
+            "name": newClub.name,
+            "type": newClub.type,
+            "code": newClub.code,
+            "memberCount": newClub.memberCount
         ]
 
-        groupRef.setData(groupData) { error in
+        clubRef.setData(clubData) { error in
             if let error = error {
                 print("Error saving group to Firestore: \(error.localizedDescription)")
             } else {
-                print("Group saved successfully: \(newGroup.name)")
+                print("Group saved successfully: \(newClub.name)")
             }
         }
     }
     
     // Function to join a group with a code
-    func joinGroup(withCode code: String, completion: @escaping (Bool) -> Void) {
+    func joinClub(withCode code: String, completion: @escaping (Bool) -> Void) {
            let query = db.collection(collectionName).whereField("code", isEqualTo: code)
            
            query.getDocuments { snapshot, error in
@@ -126,13 +126,14 @@ final class GroupStore: ObservableObject {
         }
 }
 
-struct GroupView: View {
+struct clubView: View {
     @State private var showMenu = false
-    @State private var navigateToCreate = false
+//    @State private var navigateToCreate = false
+    @State private var showCreateSheet = false
     @State private var showJoinSheet = false
     @State private var showFeedback = false
     
-    @StateObject var store = GroupStore()
+    @StateObject var store = clubStore()
     
     var body: some View {
         NavigationStack {
@@ -190,7 +191,7 @@ struct GroupView: View {
                             Spacer()
                             VStack(spacing: 16) {
                                 MenuButton(icon: "plus", text: "Create") {
-                                    navigateToCreate = true
+                                    showCreateSheet = true
                                     showMenu = false
                                 }
                                 MenuButton(icon: "qrcode", text: "Join with QR") {
@@ -210,17 +211,17 @@ struct GroupView: View {
                     }
                     .transition(.opacity)
                 }
-                
-                NavigationLink(
-                    destination: CreateGroupView().environmentObject(store),
-                    isActive: $navigateToCreate,
-                    label: { EmptyView() }
-                )
             }
             .sheet(isPresented: $showJoinSheet) {
                 JoinWithCodeView()
                     .environmentObject(store)
                     .presentationDetents([.fraction(0.35)])
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showCreateSheet) {
+                createClubSheet()
+                    .environmentObject(store)
+                    .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
         }
@@ -265,20 +266,11 @@ struct MenuButton: View {
     }
 }
 
-struct CreateGroupView: View {
-    @EnvironmentObject var store: GroupStore
+struct createClubSheet: View {
+    @EnvironmentObject var store: clubStore
     @Environment(\.dismiss) var dismiss
     
-    @State private var groupName = ""
-    @State private var groupType = "Club"
-    @State private var showDropdown = false
-    
-    let groupTypes = ["Club", "Team", "Community", "Work"]
-    
-//    func generateSixCharacterCode() -> String {
-//        let randomInt = Int.random(in: 0...999_999)
-//        return String(format: "%06d", randomInt)
-//    }
+    @State private var clubName = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -287,7 +279,7 @@ struct CreateGroupView: View {
                 .fontWeight(.semibold)
                 .padding(.bottom, 10)
             
-            TextField("Name", text: $groupName)
+            TextField("Club Name", text: $clubName)
                 .padding()
                 .frame(height: 50)
                 .background(Color(.systemGray6))
@@ -297,82 +289,28 @@ struct CreateGroupView: View {
                         .stroke(Color.gray.opacity(0.5), lineWidth: 1)
                 )
             
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Group Type")
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-                
-                Button(action: {
-                    withAnimation { showDropdown.toggle() }
-                }) {
-                    HStack {
-                        Text(groupType)
-                            .foregroundColor(.black)
-                        Spacer()
-                        Image(systemName: showDropdown ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    .frame(height: 50)
-                    .background(Color.white)
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                    )
-                }
-                
-                if showDropdown {
-                    VStack(spacing: 0) {
-                        ForEach(groupTypes, id: \.self) { type in
-                            Button(action: {
-                                self.groupType = type
-                                withAnimation { showDropdown = false }
-                            }) {
-                                Text(type)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding()
-                                    .background(Color.white)
-                            }
-                            .foregroundColor(.black)
-                            .overlay(
-                                Rectangle()
-                                    .frame(height: 0.5)
-                                    .foregroundColor(Color.gray.opacity(0.5)),
-                                alignment: .bottom
-                            )
-                        }
-                    }
-                    .background(Color.white)
-                    .cornerRadius(8)
-                    .shadow(radius: 2)
-                }
-            }
-            .zIndex(1)
-            
             Button(action: {
-                store.addGroup(name: groupName, type: groupType)
+                store.addClub(name: clubName, type: "Club")
                 dismiss()
             }) {
-                Text("Save")
+                Text("Create")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(groupName.isEmpty ? Color.gray : Color.blue)
+                    .background(clubName.isEmpty ? Color.gray : Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            .disabled(groupName.isEmpty)
+            .disabled(clubName.isEmpty)
             .padding(.top, 10)
             
             Spacer()
         }
         .padding()
-        .navigationTitle("Create Group")
     }
 }
 
 struct JoinWithCodeView: View {
-    @EnvironmentObject var store: GroupStore
+    @EnvironmentObject var store: clubStore
     @Environment(\.dismiss) var dismiss
     
     @State private var digit1: String = ""
@@ -411,7 +349,7 @@ struct JoinWithCodeView: View {
             .padding()
             
             Button(action: {
-                store.joinGroup(withCode: joinCode) { success in
+                store.joinClub(withCode: joinCode) { success in
                     if success {
                         dismiss()
                     } else {
@@ -503,7 +441,7 @@ struct GroupRow: View {
 }
 
 struct GroupsListView: View {
-    @EnvironmentObject var store: GroupStore
+    @EnvironmentObject var store: clubStore
     
     var body: some View {
         List {
@@ -514,7 +452,7 @@ struct GroupsListView: View {
             }
         }
         .listStyle(PlainListStyle())
-        .navigationTitle("My Groups")
+        .navigationTitle("My Clubs")
         .navigationBarBackButtonHidden(true)
     }
 }
@@ -522,15 +460,15 @@ struct GroupsListView: View {
 struct CreateGroupView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            CreateGroupView()
-                .environmentObject(GroupStore())
+            createClubSheet()
+                .environmentObject(clubStore())
         }
     }
 }
 
 struct GroupView_Previews: PreviewProvider {
     static var previews: some View {
-        GroupView()
+        clubView()
     }
 }
 
@@ -538,7 +476,7 @@ struct JoinWithCodeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             JoinWithCodeView()
-                .environmentObject(GroupStore())
+                .environmentObject(clubStore())
         }
     }
 }

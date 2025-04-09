@@ -7,15 +7,15 @@
 
 import SwiftUI
 
-public struct FieldsView: View {
+public struct ToolsView: View {
     public init () {
         
     }
     public var body: some View {
-        Text("FieldsView")
+        Text("Tools Hub")
     }
 }
 
 #Preview {
-    FieldsView()
+    ToolsView()
 }

@@ -35,7 +35,7 @@ public struct GamesView: View {
                         ToolButton(title:"Manage Field")
                     }
                     
-                    NavigationLink(destination: FieldsView()){
+                    NavigationLink(destination: ToolsView()){
                         ToolButton(title: "Fields")
                     }
                 }

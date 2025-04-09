@@ -65,11 +65,11 @@ struct ContentView: View {
                         Label("Home", systemImage: "house")
                     }.tag(0)
                 
-                GroupView().tabItem{
+                clubView().tabItem{
                     Label("Clubs", systemImage: "person.3")
                 }.tag(1)
                 
-                GamesView().tabItem{
+                FixturesView().tabItem{
                     Label("Fixtures", systemImage: "soccerball")
                 }.tag(2)
                 

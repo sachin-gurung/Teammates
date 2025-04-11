@@ -446,9 +446,11 @@ struct GroupsListView: View {
     var body: some View {
         List {
             ForEach(store.groups) { group in
-                GroupRow(group: group)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                NavigationLink(destination: ClubDetailTabsView(club: group)) {
+                    GroupRow(group: group)
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
         }
         .listStyle(PlainListStyle())

@@ -8,7 +8,10 @@
 import SwiftUI
 import Combine
 import FirebaseAnalytics
+import FirebaseCore
 import AuthenticationServices
+import GoogleSignIn
+import GoogleSignInSwift
 
 private enum FocusableField: Hashable {
     case email
@@ -101,6 +104,27 @@ struct LoginView: View {
                 Text("or")
                 VStack { Divider() }
             }
+            
+            if FirebaseApp.app() != nil {
+                GoogleSignInButton{
+                    Task {
+                        await viewModel.signInWithGoogle()
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 50)
+                .cornerRadius(8)
+            } else {
+                ProgressView("Loading Google Sign-in...")
+                    .frame(maxWidth: .infinity, minHeight: 50)
+            }
+            
+//            GoogleSignInButton {
+//                Task {
+//                    await viewModel.signInWithGoogle()
+//                }
+//            }
+//            .frame(maxWidth: .infinity, minHeight: 50)
+//            .cornerRadius(8)
 
             SignInWithAppleButton(.signIn) { request in
                 viewModel.handleSignInWithAppleRequest(request)

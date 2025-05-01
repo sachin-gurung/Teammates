@@ -1,9 +1,14 @@
 import Foundation
 import FirebaseAuth
+import FirebaseCore
 
 // For Sign in with Apple
 import AuthenticationServices
 import CryptoKit
+
+// For Sign in with Google
+import GoogleSignIn
+import GoogleSignInSwift
 
 enum AuthenticationState {
   case unauthenticated
@@ -225,7 +230,49 @@ extension AuthenticationViewModel {
       }
     }
   }
-
+    
+    func signInWithGoogle() async {
+        authenticationState = .authenticating
+        errorMessage = ""
+        
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            errorMessage = "Missing Google Client ID."
+            authenticationState = .unauthenticated
+            return
+        }
+        
+        let config = GIDConfiguration(clientID: clientID)
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            errorMessage = "Unable to get root view controller."
+            authenticationState = .unauthenticated
+            return
+        }
+        
+        do {
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+            let user = result.user
+            
+            guard let idToken = user.idToken?.tokenString else {
+                errorMessage = "Soggle sign-in failed. Missing tokens."
+                authenticationState = .unauthenticated
+                return
+            }
+            
+            let accessToken = user.accessToken.tokenString
+            
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+            
+            let authResult = try await Auth.auth().signIn(with: credential)
+            self.user = authResult.user
+            self.displayName = authResult.user.displayName ?? authResult.user.email ?? ""
+            authenticationState = .authenticated
+        } catch {
+            errorMessage = error.localizedDescription
+            authenticationState = .unauthenticated
+        }
+    }
 }
 
 extension ASAuthorizationAppleIDCredential {

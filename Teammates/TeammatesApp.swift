@@ -12,35 +12,38 @@ import FirebaseAuth
 import StreamChat
 import StreamChatUI
 
-class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-
-    return true
-  }
-}
+//class AppDelegate: NSObject, UIApplicationDelegate {
+//  func application(_ application: UIApplication,
+//                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+////    FirebaseApp.configure()
+//
+//    return true
+//  }
+//}
 
 @main
 struct TeammatesApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     @StateObject private var authViewModel = AuthenticationViewModel();
     @StateObject var store = clubStore()
     @State private var showFeedback = false
     @StateObject var motionManager = MotionManager() // Add MotionManager
     
-    init(){
-        // Determine the correct configuration file
-        let isDev = Bundle.main.bundleIdentifier?.contains("dev") ?? false
-        let configFileName = isDev ? "GoogleService-Info-dev" : "GoogleService-Info-prod"
-
-        // Load the configuration manually
-        if let filePath = Bundle.main.path(forResource: configFileName, ofType: "plist"),
-           let options = FirebaseOptions(contentsOfFile: filePath) {
-            FirebaseApp.configure(options: options)
-        } else{
-            fatalError("Could not load \(configFileName).plist")
-        }
-    }
+//    init(){
+//        // Determine the correct configuration file
+//        let isDev = Bundle.main.bundleIdentifier?.contains("dev") ?? false
+//        let configFileName = isDev ? "GoogleService-Info-dev" : "GoogleService-Info-prod"
+//
+//        // Load the configuration manually
+//        if let filePath = Bundle.main.path(forResource: configFileName, ofType: "plist"),
+//           let options = FirebaseOptions(contentsOfFile: filePath) {
+//            FirebaseApp.configure(options: options)
+//        } else{
+//            fatalError("Could not load \(configFileName).plist")
+//        }
+//    }
+    
     var body: some Scene {
         WindowGroup {
             MainAppView()
@@ -80,6 +83,26 @@ struct TeammatesApp: App {
 //                FeedbackView()
 //            }
         }
+    }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        let isDev = Bundle.main.bundleIdentifier?.contains("dev") ?? false
+        let configFileName = isDev ? "GoogleService-Info-dev" : "GoogleService-Info-prod"
+        
+        guard let filePath = Bundle.main.path(forResource: configFileName, ofType: "plist"),
+              let options = FirebaseOptions(contentsOfFile: filePath) else {
+            fatalError("Could not load Firebase config: \(configFileName).plist")
+        }
+        
+        FirebaseApp.configure(options: options)
+        print("Firebase configured with \(configFileName).plist")
+        
+        return true
     }
 }
 

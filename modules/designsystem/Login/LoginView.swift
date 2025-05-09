@@ -28,9 +28,16 @@ struct LoginView: View {
 
     @FocusState private var focus: FocusableField?
 
-    private func signInWithEmailPassword() {
+    private func handleEmailAuth() {
         Task {
-            if await viewModel.signInWithEmailPassword() == true {
+            let success: Bool
+            if viewModel.flow == .login {
+                success = await viewModel.signInWithEmailPassword()
+            } else {
+                success = await viewModel.signUpWithEmailPassword()
+            }
+            if success {
+                viewModel.reset() // clears email, password, confirmPassword fields
                 dismiss()
             }
         }
@@ -43,7 +50,7 @@ struct LoginView: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(minHeight: 300, maxHeight: 400)
             
-            Text("Login")
+            Text(viewModel.flow == .login ? "Login" : "Sign Up")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -69,12 +76,23 @@ struct LoginView: View {
                     .focused($focus, equals: .password)
                     .submitLabel(.go)
                     .onSubmit {
-                        signInWithEmailPassword()
+                        handleEmailAuth()
                     }
             }
             .padding(.vertical, 6)
             .background(Divider(), alignment: .bottom)
             .padding(.bottom, 8)
+            
+            if viewModel.flow == .signUp {
+                HStack {
+                    Image(systemName: "lock.rotation")
+                    SecureField("Confirm Password", text: $viewModel.confirmPassword)
+                        .submitLabel(.done)
+                }
+                .padding(.vertical, 6)
+                .background(Divider(), alignment: .bottom)
+                .padding(.bottom, 8)
+            }
 
             if !viewModel.errorMessage.isEmpty {
                 VStack {
@@ -83,9 +101,9 @@ struct LoginView: View {
                 }
             }
 
-            Button(action: signInWithEmailPassword) {
+            Button(action: handleEmailAuth) {
                 if viewModel.authenticationState != .authenticating {
-                    Text("Login")
+                    Text(viewModel.flow == .login ? "Login" : "Create Account")
                         .padding(.vertical, 8)
                         .frame(maxWidth: .infinity)
                 } else {
@@ -136,11 +154,9 @@ struct LoginView: View {
             .cornerRadius(8)
 
             HStack {
-                Text("Don't have an account yet?")
-                Button(action: { viewModel.switchFlow() }) {
-                    Text("Sign up")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.blue)
+                Text(viewModel.flow == .login ? "Don't have an account yet?" : "Already have an account?")
+                Button(action: { viewModel.switchFlow()}) {
+                    Text(viewModel.flow == .login ? "Sign up" : "Login")
                 }
             }
             .padding([.top, .bottom], 50)

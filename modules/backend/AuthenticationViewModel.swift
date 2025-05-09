@@ -65,6 +65,7 @@ class AuthenticationViewModel: ObservableObject {
 
   func switchFlow() {
     flow = flow == .login ? .signUp : .login
+      password = ""
     errorMessage = ""
   }
 
@@ -81,7 +82,6 @@ class AuthenticationViewModel: ObservableObject {
 
   func reset() {
     flow = .login
-    email = ""
     password = ""
     confirmPassword = ""
   }

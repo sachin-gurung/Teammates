@@ -1,6 +1,7 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 import SwiftUI
+import Firebase
 
 public struct FixturesView: View {
     @State private var showCreateSheet = false
@@ -72,10 +73,13 @@ public struct MatchView: View{
 }
 
 public struct TournamentPageView: View{
-    @State private var tournaments: [Tournament] = [Tournament(name: "Tournament 1", league: "League 1", teams: 1), Tournament(name: "Tournament 2", league: "League 2", teams: 2), Tournament(name: "Tournament 3", league: "League 3", teams: 3)]
+    @State private var tournaments: [Tournament] = []
     @State private var showMenu = false
     @State private var showCreateSheet = false
     @State private var showJoinSheet = false
+    @State private var tournamentName: String = ""
+    @State private var selectedFormat: String = "League"
+    @State private var showDuplicateAlert = false
     
     public var body: some View{
         ZStack {
@@ -148,15 +152,125 @@ public struct TournamentPageView: View{
                 }
             }
         }
-        .sheet(isPresented: $showCreateSheet) {
-            Text("Create Tournament Sheet")
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+        .onAppear {
+            loadTournaments()
         }
+        .overlay(
+            showCreateSheet ? TournamentDialog(
+                name: $tournamentName,
+                format: $selectedFormat,
+                onDismiss: {
+                    tournamentName = ""
+                    showCreateSheet = false
+                },
+                onConfirm: {
+                    let trimmedName = tournamentName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let db = Firestore.firestore()
+                    db.collection("tournaments_1")
+                        .whereField("name", isEqualTo: trimmedName)
+                        .getDocuments { (querySnapshot, error) in
+                            if let error = error {
+                                print("Error checking for duplicates: \(error)")
+                                return
+                            }
+                            if let documents = querySnapshot?.documents, !documents.isEmpty {
+                                showDuplicateAlert = true
+                            } else {
+                                let newTournament = Tournament(name: trimmedName, league: selectedFormat, teams: 0)
+                                tournaments.append(newTournament)
+
+                                db.collection("tournaments_1").addDocument(data: [
+                                    "name": newTournament.name,
+                                    "league": newTournament.league,
+                                    "teams": newTournament.teams
+                                ])
+                                tournamentName = ""
+                                showCreateSheet = false
+                            }
+                        }
+                }
+            ) : nil
+        )
         .sheet(isPresented: $showJoinSheet) {
             Text("Join with Code")
                 .presentationDetents([.fraction(0.35)])
                 .presentationDragIndicator(.visible)
+        }
+        .alert("Tournament already exists", isPresented: $showDuplicateAlert) {
+            Button("OK", role: .cancel) {
+                tournamentName = ""
+            }
+        }
+    }
+
+    // Loads tournaments from Firestore and populates the tournaments array
+    private func loadTournaments() {
+        let db = Firestore.firestore()
+        db.collection("tournaments_1").getDocuments { snapshot, error in
+            if let error = error {
+                print("Error fetching tournaments: \(error)")
+                return
+            }
+            if let documents = snapshot?.documents {
+                tournaments = documents.map { doc in
+                    let data = doc.data()
+                    return Tournament(
+                        name: data["name"] as? String ?? "Unknown",
+                        league: data["league"] as? String ?? "Unknown",
+                        teams: data["teams"] as? Int ?? 0
+                    )
+                }
+            }
+        }
+    }
+}
+
+struct TournamentDialog: View {
+    @Binding var name: String
+    @Binding var format: String
+    var onDismiss: () -> Void
+    var onConfirm: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Name your tournament")
+                    .font(.headline)
+
+                TextField("Enter tournament name", text: $name)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                Text("Format")
+                    .font(.headline)
+
+                Picker("Format", selection: $format) {
+                    Text("League").tag("League")
+                    Text("Knockout").tag("Knockout")
+                    Text("League and Knockout").tag("League and Knockout")
+                }
+                .pickerStyle(MenuPickerStyle())
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(8)
+
+                HStack {
+                    Spacer()
+                    Button("Dismiss", action: onDismiss)
+                        .foregroundColor(.purple)
+
+                    Button("Confirm", action: onConfirm)
+                        .foregroundColor(name.isEmpty ? .gray : .purple)
+                        .disabled(name.isEmpty)
+                }
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(20)
+            .padding(.horizontal, 40)
         }
     }
 }

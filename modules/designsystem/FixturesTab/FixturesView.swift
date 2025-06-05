@@ -167,7 +167,7 @@ public struct TournamentPageView: View{
                     let trimmedName = tournamentName.trimmingCharacters(in: .whitespacesAndNewlines)
                     let db = Firestore.firestore()
                     db.collection("tournaments_1")
-                        .whereField("name", isEqualTo: trimmedName)
+                        .whereField("name_lower", isEqualTo: trimmedName.lowercased())
                         .getDocuments { (querySnapshot, error) in
                             if let error = error {
                                 print("Error checking for duplicates: \(error)")
@@ -181,6 +181,7 @@ public struct TournamentPageView: View{
 
                                 db.collection("tournaments_1").addDocument(data: [
                                     "name": newTournament.name,
+                                    "name_lower": newTournament.name.lowercased(),
                                     "league": newTournament.league,
                                     "teams": newTournament.teams
                                 ])

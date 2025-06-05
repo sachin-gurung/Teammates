@@ -193,7 +193,7 @@ public struct TournamentPageView: View{
             ) : nil
         )
         .sheet(isPresented: $showJoinSheet) {
-            Text("Join with Code")
+            JoinTournamentView()
                 .presentationDetents([.fraction(0.35)])
                 .presentationDragIndicator(.visible)
         }
@@ -320,6 +320,117 @@ public struct Tournament: Identifiable {
 struct FixturesView_Previews: PreviewProvider {
     static var previews: some View {
         FixturesView()
+    }
+}
+
+
+struct JoinTournamentView: View {
+    @Environment(\.dismiss) var dismiss
+    @State private var digit1 = ""
+    @State private var digit2 = ""
+    @State private var digit3 = ""
+    @State private var digit4 = ""
+    @State private var digit5 = ""
+    @State private var digit6 = ""
+    @FocusState private var focusedField: Int?
+
+    @State private var showError = false
+    @State private var errorMessage = ""
+
+    var code: String {
+        return "\(digit1)\(digit2)\(digit3)\(digit4)\(digit5)\(digit6)".uppercased()
+    }
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Join With Code")
+                .font(.headline)
+
+            HStack(spacing: 10) {
+                ForEach(0..<6) { index in
+                    codeBox(for: index)
+                }
+            }
+            .padding(.horizontal)
+
+            Button(action: {
+                let db = Firestore.firestore()
+                db.collection("tournaments_1")
+                    .whereField("code", isEqualTo: code)
+                    .getDocuments { snapshot, error in
+                        if let error = error {
+                            errorMessage = "Error: \(error.localizedDescription)"
+                            showError = true
+                            return
+                        }
+
+                        guard snapshot?.documents.first != nil else {
+                            errorMessage = "Tournament not found for code \(code)"
+                            showError = true
+                            return
+                        }
+
+                        dismiss()
+                    }
+            }) {
+                Text("Join")
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 20)
+                    .background(Color.gray)
+                    .cornerRadius(10)
+            }
+            .disabled(code.count < 6)
+            .padding(.horizontal)
+
+        }
+        .onAppear {
+            focusedField = 0
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    @ViewBuilder
+    private func codeBox(for index: Int) -> some View {
+        let binding: Binding<String> = {
+            switch index {
+            case 0: return $digit1
+            case 1: return $digit2
+            case 2: return $digit3
+            case 3: return $digit4
+            case 4: return $digit5
+            case 5: return $digit6
+            default: return .constant("")
+            }
+        }()
+        if index >= 0 && index < 6 {
+            TextField("", text: binding)
+                .keyboardType(.asciiCapable)
+                .textInputAutocapitalization(.characters)
+                .multilineTextAlignment(.center)
+                .focused($focusedField, equals: index)
+                .frame(width: 40, height: 50)
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(8)
+                .onChange(of: binding.wrappedValue) { newValue in
+                    if newValue.count > 1 {
+                        binding.wrappedValue = String(newValue.prefix(1))
+                    }
+                    if !newValue.isEmpty {
+                        if index < 5 {
+                            focusedField = index + 1
+                        } else {
+                            focusedField = nil
+                        }
+                    }
+                }
+        } else {
+            EmptyView()
+        }
     }
 }
 

@@ -1,22 +1,6 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-//import SwiftUI
-//
-//public struct GroupView: View {
-//    public init () {
-//
-//    }
-//
-//    public var body: some View {
-//        Text("You have no groups\nCreate some groups")
-//            .multilineTextAlignment(.center).padding()
-//    }
-//}
-
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
 import SwiftUI
 import FirebaseFirestore
+import CoreImage.CIFilterBuiltins
 
 struct Club: Identifiable {
     var id: String // Firestore document ID
@@ -24,6 +8,7 @@ struct Club: Identifiable {
     let type: String
     let code: String
     var memberCount: Int
+    var logoImage: UIImage? = nil
     
     func displayText() -> String {
         return "\(name) (\(code))"
@@ -32,24 +17,25 @@ struct Club: Identifiable {
 
 final class clubStore: ObservableObject {
     @Published var groups: [Club] = []
+    @Published var selectedClub: Club? = nil
     
     private let db = Firestore.firestore()
     private let collectionName = "clubs_1"
     
     init(){
-        fetchGroups()
+        fetchClubs()
     }
     
     // Function to fetch groups from Firestore
-    func fetchGroups() {
+    func fetchClubs() {
         db.collection(collectionName).addSnapshotListener { snapshot, error in
             guard let documents = snapshot?.documents else {
-                print("❌ Error fetching groups: \(error?.localizedDescription ?? "Unknown error")")
+                print("Error fetching clubs: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
             
             DispatchQueue.main.async {
-                self.groups.removeAll() // Clear existing groups befor updating
+                self.groups.removeAll()
                 self.groups = documents.compactMap { doc -> Club? in
                     let data = doc.data()
                     return self.decodeGroup(id: doc.documentID, data: data)
@@ -59,7 +45,7 @@ final class clubStore: ObservableObject {
     }
     
      // Function to add a group to Firestore
-    func addClub(name: String, type: String) {
+    func addClub(name: String, type: String, completion: @escaping (Bool) -> Void) {
         let clubRef = db.collection(collectionName).document() // Generates unique Firestore ID
         let clubID = clubRef.documentID // Get the auto-generated ID
         let newClub = Club(id: clubID, name: name, type: type, code: generateSixCharacterCode(), memberCount: 1)
@@ -75,8 +61,10 @@ final class clubStore: ObservableObject {
         clubRef.setData(clubData) { error in
             if let error = error {
                 print("Error saving group to Firestore: \(error.localizedDescription)")
+                completion(false)
             } else {
                 print("Group saved successfully: \(newClub.name)")
+                completion(true)
             }
         }
     }
@@ -85,24 +73,19 @@ final class clubStore: ObservableObject {
     func joinClub(withCode code: String, completion: @escaping (Bool) -> Void) {
            let query = db.collection(collectionName).whereField("code", isEqualTo: code)
            
-           query.getDocuments { snapshot, error in
-               if let document = snapshot?.documents.first {
-                   let data = document.data()
-                   var memberCount = data["memberCount"] as? Int ?? 0
-                   memberCount += 1
-                   
-                   document.reference.updateData(["memberCount": memberCount]) { error in
-                       if let error = error {
-                           print("Error updating group: \(error.localizedDescription)")
-                           completion(false)
-                       } else {
-                           completion(true)
-                       }
-                   }
-               } else {
-                   print("Group not found for code: \(code)")
-                   completion(false)
-               }
+        query.getDocuments { snapshot, error in
+            if let document = snapshot?.documents.first {
+                let data = document.data()
+                var memberCount = data["memberCount"] as? Int ?? 0
+                memberCount += 1
+                
+                document.reference.updateData(["memberCount": memberCount]) { error in
+                    completion(error == nil)
+                }
+            } else {
+                    print("Group not found for code: \(code)")
+                    completion(true)
+                }
            }
        }
     
@@ -126,14 +109,86 @@ final class clubStore: ObservableObject {
         }
 }
 
+struct GroupRow: View {
+    var group: Club
+    static let context = CIContext()
+    static let filter = CIFilter.qrCodeGenerator()
+
+    private func generateQRCode(from string: String) -> UIImage? {
+        let data = Data(string.utf8)
+        Self.filter.setValue(data, forKey: "inputMessage")
+
+        if let outputImage = Self.filter.outputImage,
+           let cgimg = Self.context.createCGImage(outputImage.transformed(by: CGAffineTransform(scaleX: 10, y: 10)), from: outputImage.extent) {
+            return UIImage(cgImage: cgimg)
+        }
+
+        return nil
+    }
+
+    private func shareClubAsQRCode(_ club: Club) {
+        guard let url = URL(string: "https://snsnextgenservices.com/club/\(club.id)"),
+              let qrImage = generateQRCode(from: url.absoluteString) else { return }
+
+        let activityVC = UIActivityViewController(activityItems: [qrImage], applicationActivities: nil)
+
+        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = scene.windows.first?.rootViewController {
+            rootVC.present(activityVC, animated: true)
+        }
+    }
+
+    var body: some View {
+        HStack {
+            // Logo
+            if let image = group.logoImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 40, height: 40)
+                    .overlay(Text("🏆"))
+            }
+
+            // Name and info
+            VStack(alignment: .leading) {
+                Text(group.name)
+                    .font(.headline)
+                Text("Members: \(group.memberCount)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                Text("Code: \(group.code)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // QR Button
+            Button(action: {
+                shareClubAsQRCode(group)
+            }) {
+                Image(systemName: "qrcode")
+                    .foregroundColor(.blue)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(8)
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .padding(.horizontal)
+    }
+}
+
 struct clubView: View {
     @State private var showMenu = false
-//    @State private var navigateToCreate = false
     @State private var showCreateSheet = false
     @State private var showJoinSheet = false
     @State private var showFeedback = false
     
-    @StateObject var store = clubStore()
+    @StateObject private var store = clubStore()
     
     var body: some View {
         NavigationStack {
@@ -190,18 +245,18 @@ struct clubView: View {
                         HStack {
                             Spacer()
                             VStack(spacing: 16) {
-                                MenuButton(icon: "plus", text: "Create") {
+                                ClubMenuButton(icon: "plus", text: "Create") {
                                     showCreateSheet = true
                                     showMenu = false
                                 }
-                                MenuButton(icon: "qrcode", text: "Join with QR") {
+                                ClubMenuButton(icon: "qrcode", text: "Join with QR") {
                                     showMenu = false
                                 }
-                                MenuButton(icon: "chevron.left.slash.chevron.right", text: "Join with Code") {
+                                ClubMenuButton(icon: "chevron.left.slash.chevron.right", text: "Join with Code") {
                                     showJoinSheet = true
                                     showMenu = false
                                 }
-                                MenuButton(icon: "magnifyingglass", text: "Find") {
+                                FixtureMenuButton(icon: "magnifyingglass", text: "Find") {
                                     showMenu = false
                                 }
                             }
@@ -244,7 +299,7 @@ struct CurvedBackground: Shape {
     }
 }
 
-struct MenuButton: View {
+struct ClubMenuButton: View {
     var icon: String
     var text: String
     var action: () -> Void
@@ -290,8 +345,13 @@ struct createClubSheet: View {
                 )
             
             Button(action: {
-                store.addClub(name: clubName, type: "Club")
-                dismiss()
+                store.addClub(name: clubName, type: "Club") { success in
+                    if success {
+                        dismiss()
+                    } else {
+                        print("Failed to create club")
+                    }
+                }
             }) {
                 Text("Create")
                     .frame(maxWidth: .infinity)
@@ -407,36 +467,13 @@ struct CodeDigitTextField: View {
     }
 }
 
-struct GroupRow: View {
-    var group: Club
+private func shareClub(_ club:Club){
+    guard let url = URL(string: "https://snsnextgenservices.com/club/\(club.id)") else {return}
+    let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
     
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(group.name)
-                    .font(.headline)
-                Text(group.type)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                HStack {
-                    Text("Members:")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text("\(group.memberCount)")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                Text("Code: \(group.code)")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-            Spacer()
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(8)
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-        .padding(.horizontal)
+    if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+       let rootVC = scene.windows.first?.rootViewController{
+        rootVC.present(activityVC, animated: true)
     }
 }
 

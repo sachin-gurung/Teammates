@@ -49,3 +49,24 @@ struct ClubTopTabsView: View {
         .foregroundColor(.primary)
     }
 }
+
+struct ClubTopTabsView_Previews: PreviewProvider {
+    struct PreviewWrapper: View {
+        @State private var selectedTab: ClubTopTabsView.Tab = .chat
+        
+        var body: some View {
+            VStack(spacing: 0) {
+                ClubTopTabsView(selectedTab: $selectedTab)
+                Spacer()
+                Text("Selected Tab: \(String(describing: selectedTab))")
+                    .padding()
+            }
+        }
+    }
+
+    static var previews: some View {
+        PreviewWrapper()
+            .previewLayout(.sizeThatFits)
+            .padding()
+    }
+}

@@ -3,67 +3,60 @@
 import SwiftUI
 
 public struct FixturesView: View {
+    @State private var showCreateSheet = false
+    @State private var showJoinSheet = false
+    @State private var showMenu = false
+    
     public init () {
         
     }
     
     public var body: some View {
-        NavigationView{
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Organize")
-                    .font(.title2)
-                    .bold()
-                    .padding(.leading)
-                
-                HStack(spacing: 20){
-                        NavigationLink(destination: MatchView()){
-                            ToolButton(title: "Match")
-                        }
-                        NavigationLink(destination: TournamentPageView()){
-                            ToolButton(title: "Tournament")
-                        }
-                }
-                .padding(.horizontal)
-                
-                Text("Field")
-                    .font(.title2)
-                    .bold()
-                    .padding(.leading)
-                
-                HStack(spacing: 20){
-                    NavigationLink(destination: ManageFieldView()){
-                        ToolButton(title:"Manage Field")
+        NavigationView {
+            VStack(spacing: 20) {
+                NavigationLink(destination: TournamentPageView()) {
+                    ZStack(alignment: .bottom) {
+                        Image("tournaments")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 180)
+                            .clipped()
+                            .cornerRadius(16)
+
+                        Text("Tournaments")
+                            .font(.title2)
+                            .bold()
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.black.opacity(0.4))
+                            .cornerRadius(16, corners: [.bottomLeft, .bottomRight])
                     }
-                    
-                    NavigationLink(destination: ToolsView()){
-                        ToolButton(title: "Fields")
-                    }
+                    .padding(.horizontal)
+                    .padding(.top)
                 }
-                .padding(.horizontal)
-                
-                Text("Groups")
-                    .font(.title2)
-                    .bold()
-                    .padding(.leading)
-                
-                ScrollView(.horizontal, showsIndicators: false){
-                    HStack(spacing: 20){
-                        NavigationLink(destination: TeamView()){
-                            ToolButton(title: "Team")
-                        }
-                        
-                        NavigationLink(destination: ClubView()){
-                            ToolButton(title: "Club")
-                        }
-                        
-                        NavigationLink(destination: clubView()){
-                            ToolButton(title: "Group")
-                        }
+
+                NavigationLink(destination: MatchView()) {
+                    ZStack(alignment: .bottom) {
+                        Image("matches")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 180)
+                            .clipped()
+                            .cornerRadius(16)
+
+                        Text("Matches")
+                            .font(.title2)
+                            .bold()
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.black.opacity(0.4))
+                            .cornerRadius(16, corners: [.bottomLeft, .bottomRight])
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-                
-                Spacer() // Add a Spacer() at the bottom to push the content to the top
+                Spacer()
             }
         }
     }
@@ -78,46 +71,11 @@ public struct MatchView: View{
     }
 }
 
-public struct ManageFieldView: View{
-    public var body: some View{
-        Text("Manage Field View")
-            .font(.largeTitle)
-            .navigationTitle("Manage Field")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-public struct ToolButton: View {
-    var title: String
-    
-    public var body: some View{
-        Text(title)
-            .frame(width: 150, height: 100)
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-    }
-}
-
-public struct TeamView: View{
-    public var body: some View{
-        Text("Team View")
-            .font(.largeTitle)
-            .navigationTitle("Team")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-public struct ClubView: View{
-    public var body: some View{
-        Text("Club View")
-            .font(.largeTitle)
-            .navigationTitle("Club")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
 public struct TournamentPageView: View{
     @State private var tournaments: [Tournament] = [Tournament(name: "Tournament 1", league: "League 1", teams: 1), Tournament(name: "Tournament 2", league: "League 2", teams: 2), Tournament(name: "Tournament 3", league: "League 3", teams: 3)]
+    @State private var showMenu = false
+    @State private var showCreateSheet = false
+    @State private var showJoinSheet = false
     
     public var body: some View{
         ZStack {
@@ -145,47 +103,84 @@ public struct TournamentPageView: View{
                     }
                 }
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .bottomBar) {
+            
+            // Floating menu buttons
+            if showMenu {
+                VStack(spacing: 16) {
+                    Spacer()
+                    FixtureMenuButton(icon: "plus", text: "New Tournament") {
+                        showCreateSheet = true
+                        showMenu = false
+                    }
+                    FixtureMenuButton(icon: "chevron.left.slash.chevron.right", text: "Register with Code") {
+                        showJoinSheet = true
+                        showMenu = false
+                    }
+                    FixtureMenuButton(icon: "magnifyingglass", text: "Find") {
+                        showMenu = false
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, 16)
+                .padding(.bottom, 80)
+                .transition(.opacity)
+            }
+            
+            // Floating "+" button
+            VStack {
+                Spacer()
                 HStack {
                     Spacer()
-                    FloatingAddButton(action: addNewTournament)
+                    Button(action: {
+                        withAnimation { showMenu.toggle() }
+                    }) {
+                        Image(systemName: showMenu ? "xmark" : "plus")
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(.white)
+                            .padding(16)
+                    }
+                    .background(Color(red: 90/255, green: 103/255, blue: 165/255))
+                    .clipShape(Circle())
+                    .shadow(color: Color.gray.opacity(0.5), radius: 4, x: 0, y: 2)
+                    .padding(.trailing, 16)
+                    .padding(.bottom, 20)
                 }
             }
         }
-        
-        // Add the Floating Add button at the bottom right above TabView
-        VStack{
-            Spacer()
-            FloatingAddButton(action: {
-                // Add action for the Floating Add button here
-            })
+        .sheet(isPresented: $showCreateSheet) {
+            Text("Create Tournament Sheet")
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
-        .padding(.trailing, 16)
-        .padding(.bottom, 60)
-    }
-    
-    private func addNewTournament() {
-        // Logic to add new tournament (show a form)
-        let newTournament = Tournament(name: "New Tournament", league: "New League", teams: 1)
-        tournaments.append(newTournament)
+        .sheet(isPresented: $showJoinSheet) {
+            Text("Join with Code")
+                .presentationDetents([.fraction(0.35)])
+                .presentationDragIndicator(.visible)
+        }
     }
 }
-
-public struct FloatingAddButton: View {
-    var action: () -> Void
+// MARK: - MenuButton Component
+struct FixtureMenuButton: View {
+    let icon: String
+    let text: String
+    let action: () -> Void
     
-    public var body: some View {
+    var body: some View {
         Button(action: action) {
-            Image(systemName: "plus")
-                .font(.largeTitle)
-                .foregroundColor(.black)
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(20)
-                .shadow(radius: 20)
-                .clipShape(Rectangle())
+            HStack(spacing: 12) {
+                Text(text)
+                    .foregroundColor(.white)
+                    .fontWeight(.semibold)
+                Image(systemName: icon)
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.white)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 18)
+            .background(Color(red: 90/255, green: 103/255, blue: 165/255))
+            .cornerRadius(28)
+            .shadow(color: Color.gray.opacity(0.3), radius: 2, x: 0, y: 2)
         }
     }
 }
@@ -205,4 +200,31 @@ public struct Tournament: Identifiable {
     public var name: String
     public var league: String
     public var teams: Int
+}
+
+struct FixturesView_Previews: PreviewProvider {
+    static var previews: some View {
+        FixturesView()
+    }
+}
+
+
+
+// MARK: - Corner Radius for Specific Corners Modifier
+import UIKit
+
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape(RoundedCorner(radius: radius, corners: corners))
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
 }

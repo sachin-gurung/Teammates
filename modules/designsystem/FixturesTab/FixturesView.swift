@@ -2,6 +2,8 @@
 // https://docs.swift.org/swift-book
 import SwiftUI
 import Firebase
+import StreamChat
+import StreamChatUI
 
 public struct FixturesView: View {
     @State private var showCreateSheet = false
@@ -86,7 +88,7 @@ public struct TournamentPageView: View{
             ScrollView {
                 VStack {
                     ForEach(tournaments, id: \.id) { tournament in
-                        NavigationLink(destination: TournamentDetailView(Tournament: tournament)) {
+                        NavigationLink(destination: TournamentTeamDetailView(teamName: tournament.name)) {
                             VStack(alignment: .leading){
                                 Text(tournament.name)
                                     .font(.headline)
@@ -193,7 +195,7 @@ public struct TournamentPageView: View{
             ) : nil
         )
         .sheet(isPresented: $showJoinSheet) {
-            Text("Join with Code")
+            JoinTournamentView()
                 .presentationDetents([.fraction(0.35)])
                 .presentationDragIndicator(.visible)
         }
@@ -300,15 +302,6 @@ struct FixtureMenuButton: View {
     }
 }
 
-public struct TournamentDetailView: View{
-    var Tournament: Tournament
-    public var body: some View{
-        Text("Tournament Detail View")
-            .font(.largeTitle)
-            .navigationTitle("Tournament Detail")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
 
 public struct Tournament: Identifiable {
     public var id = UUID()
@@ -320,6 +313,117 @@ public struct Tournament: Identifiable {
 struct FixturesView_Previews: PreviewProvider {
     static var previews: some View {
         FixturesView()
+    }
+}
+
+
+struct JoinTournamentView: View {
+    @Environment(\.dismiss) var dismiss
+    @State private var digit1 = ""
+    @State private var digit2 = ""
+    @State private var digit3 = ""
+    @State private var digit4 = ""
+    @State private var digit5 = ""
+    @State private var digit6 = ""
+    @FocusState private var focusedField: Int?
+
+    @State private var showError = false
+    @State private var errorMessage = ""
+
+    var code: String {
+        return "\(digit1)\(digit2)\(digit3)\(digit4)\(digit5)\(digit6)".uppercased()
+    }
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Join With Code")
+                .font(.headline)
+
+            HStack(spacing: 10) {
+                ForEach(0..<6) { index in
+                    codeBox(for: index)
+                }
+            }
+            .padding(.horizontal)
+
+            Button(action: {
+                let db = Firestore.firestore()
+                db.collection("tournaments_1")
+                    .whereField("code", isEqualTo: code)
+                    .getDocuments { snapshot, error in
+                        if let error = error {
+                            errorMessage = "Error: \(error.localizedDescription)"
+                            showError = true
+                            return
+                        }
+
+                        guard snapshot?.documents.first != nil else {
+                            errorMessage = "Tournament not found for code \(code)"
+                            showError = true
+                            return
+                        }
+
+                        dismiss()
+                    }
+            }) {
+                Text("Join")
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 20)
+                    .background(Color.gray)
+                    .cornerRadius(10)
+            }
+            .disabled(code.count < 6)
+            .padding(.horizontal)
+
+        }
+        .onAppear {
+            focusedField = 0
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    @ViewBuilder
+    private func codeBox(for index: Int) -> some View {
+        let binding: Binding<String> = {
+            switch index {
+            case 0: return $digit1
+            case 1: return $digit2
+            case 2: return $digit3
+            case 3: return $digit4
+            case 4: return $digit5
+            case 5: return $digit6
+            default: return .constant("")
+            }
+        }()
+        if index >= 0 && index < 6 {
+            TextField("", text: binding)
+                .keyboardType(.asciiCapable)
+                .textInputAutocapitalization(.characters)
+                .multilineTextAlignment(.center)
+                .focused($focusedField, equals: index)
+                .frame(width: 40, height: 50)
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(8)
+                .onChange(of: binding.wrappedValue) { newValue in
+                    if newValue.count > 1 {
+                        binding.wrappedValue = String(newValue.prefix(1))
+                    }
+                    if !newValue.isEmpty {
+                        if index < 5 {
+                            focusedField = index + 1
+                        } else {
+                            focusedField = nil
+                        }
+                    }
+                }
+        } else {
+            EmptyView()
+        }
     }
 }
 
@@ -341,5 +445,89 @@ struct RoundedCorner: Shape {
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
         return Path(path.cgPath)
+    }
+}
+
+// MARK: - TournamentTeamDetailView (Tabbed)
+struct TournamentTeamDetailView: View {
+    var teamName: String
+    @State private var selectedTab: Int = 0
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Picker("", selection: $selectedTab) {
+                Text("Chat").tag(0)
+                Text("Matches & Results").tag(1)
+                Image(systemName: "gearshape").tag(2)
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+
+            Divider()
+
+            // Tournament logo just below the segmented tab and above the team name (only in tab 2)
+            if selectedTab == 2 {
+                Image("tournaments")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 100)
+                    .padding(.top, 10)
+            }
+
+            Group {
+                if selectedTab == 0 {
+                    ChatChannelView(channelId: .init(type: .messaging, id: teamName))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.white)
+                } else if selectedTab == 1 {
+                    VStack {
+                        Text("Matches & Results for \(teamName)")
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.white)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Remove duplicate logo here
+                            // Image("tournament_logo_placeholder")
+                            //     .resizable()
+                            //     .frame(width: 140, height: 100)
+                            //     .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                            Text(teamName)
+                                .font(.headline)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.white)
+                                .cornerRadius(24)
+
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                                ForEach([
+                                    ("Tournament Settings", "gear"),
+                                    ("Teams & Fixtures", "person.3"),
+                                    ("Notification Settings", "bell"),
+                                    ("Leave", "xmark.circle.fill")
+                                ], id: \.0) { item in
+                                    Button(action: {
+                                        // Add action here
+                                    }) {
+                                        Text(item.0)
+                                            .foregroundColor(item.0 == "Leave" ? .white : .black)
+                                            .frame(maxWidth: .infinity)
+                                            .padding()
+                                            .background(item.0 == "Leave" ? Color(red: 152/255, green: 67/255, blue: 56/255) : Color.white)
+                                            .cornerRadius(12)
+                                            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding()
+                    }
+                    .background(Color(red: 0.93, green: 0.89, blue: 1.0).ignoresSafeArea())
+                }
+            }
+        }
     }
 }

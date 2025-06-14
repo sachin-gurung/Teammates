@@ -2,6 +2,8 @@
 // https://docs.swift.org/swift-book
 import SwiftUI
 import Firebase
+import StreamChat
+import StreamChatUI
 
 public struct FixturesView: View {
     @State private var showCreateSheet = false
@@ -86,7 +88,7 @@ public struct TournamentPageView: View{
             ScrollView {
                 VStack {
                     ForEach(tournaments, id: \.id) { tournament in
-                        NavigationLink(destination: TournamentDetailView(Tournament: tournament)) {
+                        NavigationLink(destination: TournamentTeamDetailView(teamName: tournament.name)) {
                             VStack(alignment: .leading){
                                 Text(tournament.name)
                                     .font(.headline)
@@ -300,15 +302,6 @@ struct FixtureMenuButton: View {
     }
 }
 
-public struct TournamentDetailView: View{
-    var Tournament: Tournament
-    public var body: some View{
-        Text("Tournament Detail View")
-            .font(.largeTitle)
-            .navigationTitle("Tournament Detail")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
 
 public struct Tournament: Identifiable {
     public var id = UUID()
@@ -452,5 +445,89 @@ struct RoundedCorner: Shape {
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
         return Path(path.cgPath)
+    }
+}
+
+// MARK: - TournamentTeamDetailView (Tabbed)
+struct TournamentTeamDetailView: View {
+    var teamName: String
+    @State private var selectedTab: Int = 0
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Picker("", selection: $selectedTab) {
+                Text("Chat").tag(0)
+                Text("Matches & Results").tag(1)
+                Image(systemName: "gearshape").tag(2)
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+
+            Divider()
+
+            // Tournament logo just below the segmented tab and above the team name (only in tab 2)
+            if selectedTab == 2 {
+                Image("tournaments")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 100)
+                    .padding(.top, 10)
+            }
+
+            Group {
+                if selectedTab == 0 {
+                    ChatChannelView(channelId: .init(type: .messaging, id: teamName))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.white)
+                } else if selectedTab == 1 {
+                    VStack {
+                        Text("Matches & Results for \(teamName)")
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.white)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Remove duplicate logo here
+                            // Image("tournament_logo_placeholder")
+                            //     .resizable()
+                            //     .frame(width: 140, height: 100)
+                            //     .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                            Text(teamName)
+                                .font(.headline)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.white)
+                                .cornerRadius(24)
+
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                                ForEach([
+                                    ("Tournament Settings", "gear"),
+                                    ("Teams & Fixtures", "person.3"),
+                                    ("Notification Settings", "bell"),
+                                    ("Leave", "xmark.circle.fill")
+                                ], id: \.0) { item in
+                                    Button(action: {
+                                        // Add action here
+                                    }) {
+                                        Text(item.0)
+                                            .foregroundColor(item.0 == "Leave" ? .white : .black)
+                                            .frame(maxWidth: .infinity)
+                                            .padding()
+                                            .background(item.0 == "Leave" ? Color(red: 152/255, green: 67/255, blue: 56/255) : Color.white)
+                                            .cornerRadius(12)
+                                            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding()
+                    }
+                    .background(Color(red: 0.93, green: 0.89, blue: 1.0).ignoresSafeArea())
+                }
+            }
+        }
     }
 }

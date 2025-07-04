@@ -455,6 +455,7 @@ struct TournamentTeamDetailView: View {
     @State private var isEditingName = false
     @State private var newTournamentName = ""
     @State private var showNameChangeAlert = false
+    @State private var isNotificationTabActive = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -468,8 +469,8 @@ struct TournamentTeamDetailView: View {
 
             Divider()
 
-            // Tournament logo just below the segmented tab and above the team name (only in tab 2)
-            if selectedTab == 2 {
+            // Tournament logo just below the segmented tab and above the team name (only in tab 2, and not in Notification Settings subview)
+            if selectedTab == 2 && !isNotificationTabActive {
                 Image("tournaments")
                     .resizable()
                     .scaledToFit()
@@ -489,49 +490,73 @@ struct TournamentTeamDetailView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.white)
                 } else {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            Button(action: {
-                                newTournamentName = teamName
-                                isEditingName = true
-                            }) {
-                                Text(teamName)
-                                    .font(.headline)
-                                    .foregroundColor(.black)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.white)
-                                    .cornerRadius(24)
+                    if isNotificationTabActive {
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Button(action: {
+                                    isNotificationTabActive = false
+                                }) {
+                                    Image(systemName: "chevron.left")
+                                        .foregroundColor(.white)
+                                }
+                                Text("Notification Settings")
+                                    .foregroundColor(.white)
+                                    .font(.title2)
+                                    .padding(.leading, 8)
                             }
+                            .padding()
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.black.ignoresSafeArea())
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 20) {
+                                Button(action: {
+                                    newTournamentName = teamName
+                                    isEditingName = true
+                                }) {
+                                    Text(teamName)
+                                        .font(.headline)
+                                        .foregroundColor(.black)
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.white)
+                                        .cornerRadius(24)
+                                }
 
-                            Divider()
+                                Divider()
 
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-                                ForEach([
-                                    ("Tournament Settings", "gear"),
-                                    ("Teams & Fixtures", "person.3"),
-                                    ("Notification Settings", "bell"),
-                                    ("Leave", "xmark.circle.fill")
-                                ], id: \.0) { item in
-                                    Button(action: {
-                                        // Add action here
-                                    }) {
-                                        Text(item.0)
-                                            .foregroundColor(item.0 == "Leave" ? .white : .black)
-                                            .frame(width: 150, height: 70)
-                                            .padding(.vertical, 4)
-                                            .padding(.horizontal)
-                                            .background(item.0 == "Leave" ? Color(red: 152/255, green: 67/255, blue: 56/255) : Color.white)
-                                            .cornerRadius(12)
-                                            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                                    ForEach([
+                                        ("Tournament Settings", "gear"),
+                                        ("Teams & Fixtures", "person.3"),
+                                        ("Notification Settings", "bell"),
+                                        ("Leave", "xmark.circle.fill")
+                                    ], id: \.0) { item in
+                                        Button(action: {
+                                            if item.0 == "Notification Settings" {
+                                                isNotificationTabActive = true
+                                            }
+                                            // Add action here for other buttons if needed
+                                        }) {
+                                            Text(item.0)
+                                                .foregroundColor(item.0 == "Leave" ? .white : .black)
+                                                .frame(width: 150, height: 70)
+                                                .padding(.vertical, 4)
+                                                .padding(.horizontal)
+                                                .background(item.0 == "Leave" ? Color(red: 152/255, green: 67/255, blue: 56/255) : Color.white)
+                                                .cornerRadius(12)
+                                                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                        }
                                     }
                                 }
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
+                            .padding()
                         }
-                        .padding()
+                        .background(Color(red: 0.93, green: 0.89, blue: 1.0).ignoresSafeArea())
                     }
-                    .background(Color(red: 0.93, green: 0.89, blue: 1.0).ignoresSafeArea())
                 }
             }
         }
@@ -575,5 +600,21 @@ struct TournamentTeamDetailView: View {
         .alert("Tournament name updated to '\(newTournamentName)'", isPresented: $showNameChangeAlert) {
             Button("OK", role: .cancel) {}
         }
+    }
+}
+
+struct NotificationsView: View {
+    var body: some View {
+        VStack {
+            Text("Notifications Settings")
+                .foregroundColor(.white)
+                .font(.title)
+                .padding()
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.ignoresSafeArea())
+        .navigationTitle("Notifications")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -450,8 +450,11 @@ struct RoundedCorner: Shape {
 
 // MARK: - TournamentTeamDetailView (Tabbed)
 struct TournamentTeamDetailView: View {
-    var teamName: String
+    @State var teamName: String
     @State private var selectedTab: Int = 0
+    @State private var isEditingName = false
+    @State private var newTournamentName = ""
+    @State private var showNameChangeAlert = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -488,18 +491,20 @@ struct TournamentTeamDetailView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 20) {
-                            // Remove duplicate logo here
-                            // Image("tournament_logo_placeholder")
-                            //     .resizable()
-                            //     .frame(width: 140, height: 100)
-                            //     .clipShape(RoundedRectangle(cornerRadius: 8))
+                            Button(action: {
+                                newTournamentName = teamName
+                                isEditingName = true
+                            }) {
+                                Text(teamName)
+                                    .font(.headline)
+                                    .foregroundColor(.black)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.white)
+                                    .cornerRadius(24)
+                            }
 
-                            Text(teamName)
-                                .font(.headline)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.white)
-                                .cornerRadius(24)
+                            Divider()
 
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
                                 ForEach([
@@ -513,8 +518,9 @@ struct TournamentTeamDetailView: View {
                                     }) {
                                         Text(item.0)
                                             .foregroundColor(item.0 == "Leave" ? .white : .black)
-                                            .frame(maxWidth: .infinity)
-                                            .padding()
+                                            .frame(width: 150, height: 70)
+                                            .padding(.vertical, 4)
+                                            .padding(.horizontal)
                                             .background(item.0 == "Leave" ? Color(red: 152/255, green: 67/255, blue: 56/255) : Color.white)
                                             .cornerRadius(12)
                                             .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
@@ -528,6 +534,46 @@ struct TournamentTeamDetailView: View {
                     .background(Color(red: 0.93, green: 0.89, blue: 1.0).ignoresSafeArea())
                 }
             }
+        }
+        .alert("Edit Tournament Name", isPresented: $isEditingName, actions: {
+            TextField("New tournament name", text: $newTournamentName)
+            Button("Cancel", role: .cancel) {
+                isEditingName = false
+            }
+            Button("Confirm") {
+                let trimmedName = newTournamentName.trimmingCharacters(in: .whitespaces)
+                guard !trimmedName.isEmpty else { return }
+                let db = Firestore.firestore()
+                db.collection("tournaments_1")
+                    .whereField("name", isEqualTo: teamName)
+                    .getDocuments { snapshot, error in
+                        if let error = error {
+                            print("Error fetching document: \(error)")
+                            return
+                        }
+                        guard let document = snapshot?.documents.first else {
+                            print("Tournament not found")
+                            return
+                        }
+                        db.collection("tournaments_1").document(document.documentID).updateData([
+                            "name": trimmedName,
+                            "name_lower": trimmedName.lowercased()
+                        ]) { error in
+                            if let error = error {
+                                print("Error updating name: \(error)")
+                            } else {
+                                teamName = trimmedName
+                                showNameChangeAlert = true
+                            }
+                        }
+                    }
+                isEditingName = false
+            }
+        }, message: {
+            Text("Enter a new name for the tournament.")
+        })
+        .alert("Tournament name updated to '\(newTournamentName)'", isPresented: $showNameChangeAlert) {
+            Button("OK", role: .cancel) {}
         }
     }
 }

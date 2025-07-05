@@ -463,6 +463,16 @@ struct TournamentTeamDetailView: View {
     // Added for Start Time picker
     @State private var showStartTimePicker = false
     @State private var startTime: Date? = nil
+    // Added for End Date picker
+    @State private var showEndDatePicker = false
+    @State private var endDate: Date? = nil
+    // Added for End Time picker
+    @State private var showEndTimePicker = false
+    @State private var endTime: Date? = nil
+    // State for End Date error alert
+    @State private var showEndDateErrorAlert = false
+    // State for End Time error alert
+    @State private var showEndTimeErrorAlert = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -552,6 +562,32 @@ struct TournamentTeamDetailView: View {
                                                     .foregroundColor(.white)
                                                 Spacer()
                                                 Text(startTime != nil ? formattedTime(startTime!) : "Not Set")
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    } else if item == "End Date" {
+                                        Button(action: {
+                                            showEndDatePicker = true
+                                        }) {
+                                            HStack {
+                                                Text("End Date")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(endDate != nil ? formattedDate(endDate!) : "Not Set")
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    } else if item == "End Time" {
+                                        Button(action: {
+                                            showEndTimePicker = true
+                                        }) {
+                                            HStack {
+                                                Text("End Time")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(endTime != nil ? formattedTime(endTime!) : "Not Set")
                                                     .foregroundColor(.gray)
                                             }
                                             .padding(.horizontal)
@@ -771,6 +807,137 @@ struct TournamentTeamDetailView: View {
             .padding()
             .presentationDetents([.fraction(0.3)])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showEndDatePicker) {
+            VStack(spacing: 20) {
+                Text("Select End Date")
+                    .font(.headline)
+                    .padding(.top)
+
+                DatePicker("",
+                           selection: Binding(
+                               get: { endDate ?? Date() },
+                               set: {
+                                   if let start = startDate, $0 < start {
+                                       showEndDateErrorAlert = true
+                                       endDate = nil
+                                   } else {
+                                       endDate = $0
+                                   }
+                               }
+                           ),
+                           displayedComponents: [.date])
+                    .datePickerStyle(WheelDatePickerStyle())
+                    .labelsHidden()
+
+                Button("Done") {
+                    showEndDatePicker = false
+                    if let selectedDate = endDate {
+                        let db = Firestore.firestore()
+                        db.collection("tournaments_1")
+                            .whereField("name", isEqualTo: teamName)
+                            .getDocuments { snapshot, error in
+                                if let error = error {
+                                    print("Error fetching document: \(error)")
+                                    return
+                                }
+                                guard let document = snapshot?.documents.first else {
+                                    print("Tournament not found")
+                                    return
+                                }
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "yyyy-MM-dd"
+                                let formattedDate = formatter.string(from: selectedDate)
+
+                                db.collection("tournaments_1").document(document.documentID).updateData([
+                                    "end_date": formattedDate
+                                ]) { error in
+                                    if let error = error {
+                                        print("Error updating end date: \(error)")
+                                    } else {
+                                        print("End date updated successfully")
+                                    }
+                                }
+                            }
+                    }
+                }
+                .padding(.bottom, 30)
+            }
+            .padding()
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.visible)
+        }
+        .alert("Invalid End Date", isPresented: $showEndDateErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("End Date cannot be earlier than the Start Date.")
+        }
+        .sheet(isPresented: $showEndTimePicker) {
+            VStack(spacing: 20) {
+                Text("Select End Time")
+                    .font(.headline)
+                    .padding(.top)
+
+                DatePicker("",
+                           selection: Binding(
+                               get: { endTime ?? Date() },
+                               set: {
+                                   if let start = startDate,
+                                      let sTime = startTime,
+                                      let eDate = endDate,
+                                      Calendar.current.isDate(eDate, inSameDayAs: start),
+                                      $0 <= sTime {
+                                       showEndTimeErrorAlert = true
+                                       endTime = nil
+                                   } else {
+                                       endTime = $0
+                                   }
+                               }),
+                           displayedComponents: [.hourAndMinute])
+                    .datePickerStyle(WheelDatePickerStyle())
+                    .labelsHidden()
+
+                Button("Done") {
+                    showEndTimePicker = false
+                    if let selectedTime = endTime {
+                        let db = Firestore.firestore()
+                        db.collection("tournaments_1")
+                            .whereField("name", isEqualTo: teamName)
+                            .getDocuments { snapshot, error in
+                                if let error = error {
+                                    print("Error fetching document: \(error)")
+                                    return
+                                }
+                                guard let document = snapshot?.documents.first else {
+                                    print("Tournament not found")
+                                    return
+                                }
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "HH:mm"
+                                let formattedTime = formatter.string(from: selectedTime)
+
+                                db.collection("tournaments_1").document(document.documentID).updateData([
+                                    "end_time": formattedTime
+                                ]) { error in
+                                    if let error = error {
+                                        print("Error updating end time: \(error)")
+                                    } else {
+                                        print("End time updated successfully")
+                                    }
+                                }
+                            }
+                    }
+                }
+                .padding(.bottom, 30)
+            }
+            .padding()
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.visible)
+        }
+        .alert("Invalid End Time", isPresented: $showEndTimeErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("End Time cannot be earlier than or equal to the Start Time when End Date is the same as Start Date.")
         }
     }
 

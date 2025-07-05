@@ -456,6 +456,13 @@ struct TournamentTeamDetailView: View {
     @State private var newTournamentName = ""
     @State private var showNameChangeAlert = false
     @State private var isNotificationTabActive = false
+    @State private var isTournamentSettingsActive = false
+    // Added for Start Date picker
+    @State private var showStartDatePicker = false
+    @State private var startDate: Date? = nil
+    // Added for Start Time picker
+    @State private var showStartTimePicker = false
+    @State private var startTime: Date? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -469,8 +476,8 @@ struct TournamentTeamDetailView: View {
 
             Divider()
 
-            // Tournament logo just below the segmented tab and above the team name (only in tab 2, and not in Notification Settings subview)
-            if selectedTab == 2 && !isNotificationTabActive {
+            // Tournament logo just below the segmented tab and above the team name (only in tab 2, and not in Notification Settings or Tournament Settings subview)
+            if selectedTab == 2 && !isNotificationTabActive && !isTournamentSettingsActive {
                 Image("tournaments")
                     .resizable()
                     .scaledToFit()
@@ -509,6 +516,64 @@ struct TournamentTeamDetailView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.black.ignoresSafeArea())
+                    } else if isTournamentSettingsActive {
+                        VStack(spacing: 0) {
+                            HStack {
+                                Spacer()
+                                Text("\(teamName) Settings")
+                                    .font(.title2)
+                                    .foregroundColor(.white)
+                                Spacer()
+                            }
+                            .padding()
+                            .background(Color(red: 0.2, green: 0.2, blue: 0.2))
+
+                            VStack(alignment: .leading, spacing: 16) {
+                                ForEach(["Start Date", "Start Time", "End Date", "End Time", "Entry fee", "Format", "Status", "Visibility", "Rules", "Users"], id: \.self) { item in
+                                    if item == "Start Date" {
+                                        Button(action: {
+                                            showStartDatePicker = true
+                                        }) {
+                                            HStack {
+                                                Text("Start Date")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(startDate != nil ? formattedDate(startDate!) : "Not Set")
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    } else if item == "Start Time" {
+                                        Button(action: {
+                                            showStartTimePicker = true
+                                        }) {
+                                            HStack {
+                                                Text("Start Time")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(startTime != nil ? formattedTime(startTime!) : "Not Set")
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    } else {
+                                        HStack {
+                                            Text(item)
+                                                .foregroundColor(.white)
+                                            Spacer()
+                                            Text("Not Set")
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                }
+                                Spacer()
+                            }
+                            .padding(.top)
+                            // Start Date Picker Sheet (replaced with alert below)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.black.ignoresSafeArea())
                     } else {
                         ScrollView {
                             VStack(spacing: 20) {
@@ -537,6 +602,9 @@ struct TournamentTeamDetailView: View {
                                         Button(action: {
                                             if item.0 == "Notification Settings" {
                                                 isNotificationTabActive = true
+                                            }
+                                            if item.0 == "Tournament Settings" {
+                                                isTournamentSettingsActive = true
                                             }
                                             // Add action here for other buttons if needed
                                         }) {
@@ -600,6 +668,124 @@ struct TournamentTeamDetailView: View {
         .alert("Tournament name updated to '\(newTournamentName)'", isPresented: $showNameChangeAlert) {
             Button("OK", role: .cancel) {}
         }
+        .sheet(isPresented: $showStartDatePicker) {
+            VStack(spacing: 20) {
+                Text("Select Start Date")
+                    .font(.headline)
+                    .padding(.top)
+
+                DatePicker("",
+                           selection: Binding(
+                               get: { startDate ?? Date() },
+                               set: { startDate = $0 }
+                           ),
+                           displayedComponents: [.date])
+                    .datePickerStyle(WheelDatePickerStyle())
+                    .labelsHidden()
+
+                Button("Done") {
+                    showStartDatePicker = false
+                    if let selectedDate = startDate {
+                        let db = Firestore.firestore()
+                        db.collection("tournaments_1")
+                            .whereField("name", isEqualTo: teamName)
+                            .getDocuments { snapshot, error in
+                                if let error = error {
+                                    print("Error fetching document: \(error)")
+                                    return
+                                }
+                                guard let document = snapshot?.documents.first else {
+                                    print("Tournament not found")
+                                    return
+                                }
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "yyyy-MM-dd"
+                                let formattedDate = formatter.string(from: selectedDate)
+
+                                db.collection("tournaments_1").document(document.documentID).updateData([
+                                    "start_date": formattedDate
+                                ]) { error in
+                                    if let error = error {
+                                        print("Error updating start date: \(error)")
+                                    } else {
+                                        print("Start date updated successfully")
+                                    }
+                                }
+                            }
+                    }
+                }
+                .padding(.bottom, 30)
+            }
+            .padding()
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showStartTimePicker) {
+            VStack(spacing: 20) {
+                Text("Select Start Time")
+                    .font(.headline)
+                    .padding(.top)
+
+                DatePicker("",
+                           selection: Binding(
+                               get: { startTime ?? Date() },
+                               set: { startTime = $0 }
+                           ),
+                           displayedComponents: [.hourAndMinute])
+                    .datePickerStyle(WheelDatePickerStyle())
+                    .labelsHidden()
+
+                Button("Done") {
+                    showStartTimePicker = false
+                    if let selectedTime = startTime {
+                        let db = Firestore.firestore()
+                        db.collection("tournaments_1")
+                            .whereField("name", isEqualTo: teamName)
+                            .getDocuments { snapshot, error in
+                                if let error = error {
+                                    print("Error fetching document: \(error)")
+                                    return
+                                }
+                                guard let document = snapshot?.documents.first else {
+                                    print("Tournament not found")
+                                    return
+                                }
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "HH:mm"
+                                let formattedTime = formatter.string(from: selectedTime)
+
+                                db.collection("tournaments_1").document(document.documentID).updateData([
+                                    "start_time": formattedTime
+                                ]) { error in
+                                    if let error = error {
+                                        print("Error updating start time: \(error)")
+                                    } else {
+                                        print("Start time updated successfully")
+                                    }
+                                }
+                            }
+                    }
+                }
+                .padding(.bottom, 30)
+            }
+            .padding()
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    // Helper for formatting date
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+
+    // Helper for formatting time
+    private func formattedTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 

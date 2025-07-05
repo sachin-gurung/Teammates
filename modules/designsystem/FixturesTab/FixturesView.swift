@@ -473,6 +473,13 @@ struct TournamentTeamDetailView: View {
     @State private var showEndDateErrorAlert = false
     // State for End Time error alert
     @State private var showEndTimeErrorAlert = false
+    // Entry Fee state
+    @State private var entryFee: String = "Free"
+    @State private var showEntryFeeAlert = false
+    @State private var entryFeeInput = ""
+    // Currency state for entry fee
+    @State private var selectedCurrencyCode = Locale.current.currencyCode ?? "USD"
+    let supportedCurrencies = ["USD"]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -592,6 +599,20 @@ struct TournamentTeamDetailView: View {
                                             }
                                             .padding(.horizontal)
                                         }
+                                    } else if item == "Entry fee" {
+                                        Button(action: {
+                                            entryFeeInput = entryFee == "Free" ? "" : entryFee
+                                            showEntryFeeAlert = true
+                                        }) {
+                                            HStack {
+                                                Text("Entry fee")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(entryFee)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal)
+                                        }
                                     } else {
                                         HStack {
                                             Text(item)
@@ -704,6 +725,49 @@ struct TournamentTeamDetailView: View {
         .alert("Tournament name updated to '\(newTournamentName)'", isPresented: $showNameChangeAlert) {
             Button("OK", role: .cancel) {}
         }
+        .alert("Change Tournament Fee", isPresented: $showEntryFeeAlert, actions: {
+            TextField("Enter amount or leave empty for Free", text: $entryFeeInput)
+                .keyboardType(.numbersAndPunctuation)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                let trimmed = entryFeeInput.trimmingCharacters(in: .whitespaces)
+                if trimmed.isEmpty {
+                    entryFee = "Free"
+                } else if let amount = Double(trimmed.filter("0123456789.".contains)) {
+                    let formatter = NumberFormatter()
+                    formatter.numberStyle = .currency
+                    formatter.currencyCode = selectedCurrencyCode
+                    entryFee = formatter.string(from: NSNumber(value: amount)) ?? "$\(trimmed)"
+                } else {
+                    // Keep the existing value if input is invalid
+                    entryFee = entryFee
+                }
+
+                // Firestore update
+                let db = Firestore.firestore()
+                db.collection("tournaments_1")
+                    .whereField("name", isEqualTo: teamName)
+                    .getDocuments { snapshot, error in
+                        if let error = error {
+                            print("Error fetching document: \(error)")
+                            return
+                        }
+                        guard let document = snapshot?.documents.first else {
+                            print("Tournament not found")
+                            return
+                        }
+                        db.collection("tournaments_1").document(document.documentID).updateData([
+                            "entry_fee": entryFee
+                        ]) { error in
+                            if let error = error {
+                                print("Error updating entry fee: \(error)")
+                            } else {
+                                print("Entry fee updated successfully")
+                            }
+                        }
+                    }
+            }
+        })
         .sheet(isPresented: $showStartDatePicker) {
             VStack(spacing: 20) {
                 Text("Select Start Date")

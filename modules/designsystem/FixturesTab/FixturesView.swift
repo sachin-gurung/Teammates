@@ -726,14 +726,26 @@ struct TournamentTeamDetailView: View {
             Button("OK", role: .cancel) {}
         }
         .alert("Change Tournament Fee", isPresented: $showEntryFeeAlert, actions: {
-            TextField("Enter amount or leave empty for Free", text: $entryFeeInput)
-                .keyboardType(.numbersAndPunctuation)
+            TextField("Enter amount or leave empty for Free", text: Binding(
+                get: { entryFeeInput },
+                set: {
+                    // Allow only valid decimal input with up to 2 decimal places
+                    let filtered = $0.filter("0123456789.".contains)
+                    let components = filtered.split(separator: ".", omittingEmptySubsequences: false)
+                    if components.count <= 2 {
+                        let integerPart = components[0]
+                        let decimalPart = components.count == 2 ? String(components[1].prefix(2)) : ""
+                        entryFeeInput = decimalPart.isEmpty ? String(integerPart) : "\(integerPart).\(decimalPart)"
+                    }
+                }
+            ))
+            .keyboardType(.decimalPad)
             Button("Cancel", role: .cancel) {}
             Button("Save") {
                 let trimmed = entryFeeInput.trimmingCharacters(in: .whitespaces)
                 if trimmed.isEmpty {
                     entryFee = "Free"
-                } else if let amount = Double(trimmed.filter("0123456789.".contains)) {
+                } else if let amount = Double(trimmed) {
                     let formatter = NumberFormatter()
                     formatter.numberStyle = .currency
                     formatter.currencyCode = selectedCurrencyCode

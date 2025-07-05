@@ -451,6 +451,7 @@ struct RoundedCorner: Shape {
 // MARK: - TournamentTeamDetailView (Tabbed)
 struct TournamentTeamDetailView: View {
     @State var teamName: String
+    @State private var selectedFormat: String = "Not Set"
     @State private var selectedTab: Int = 0
     @State private var isEditingName = false
     @State private var newTournamentName = ""
@@ -480,6 +481,7 @@ struct TournamentTeamDetailView: View {
     // Currency state for entry fee
     @State private var selectedCurrencyCode = Locale.current.currencyCode ?? "USD"
     let supportedCurrencies = ["USD"]
+    @State private var showFormatAlert = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -556,6 +558,19 @@ struct TournamentTeamDetailView: View {
                                                     .foregroundColor(.white)
                                                 Spacer()
                                                 Text(startDate != nil ? formattedDate(startDate!) : "Not Set")
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    } else if item == "Format" {
+                                        Button(action: {
+                                            showFormatAlert = true
+                                        }) {
+                                            HStack {
+                                                Text("Format")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(selectedFormat)
                                                     .foregroundColor(.gray)
                                             }
                                             .padding(.horizontal)
@@ -1015,6 +1030,27 @@ struct TournamentTeamDetailView: View {
         } message: {
             Text("End Time cannot be earlier than or equal to the Start Time when End Date is the same as Start Date.")
         }
+        .confirmationDialog("Change Format", isPresented: $showFormatAlert, titleVisibility: .visible) {
+            Button("League") {
+                if selectedFormat != "League" {
+                    selectedFormat = "League"
+                    saveFormat()
+                }
+            }
+            Button("Knockout") {
+                if selectedFormat != "Knockout" {
+                    selectedFormat = "Knockout"
+                    saveFormat()
+                }
+            }
+            Button("League and Knockout") {
+                if selectedFormat != "League and Knockout" {
+                    selectedFormat = "League and Knockout"
+                    saveFormat()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
     }
 
     // Helper for formatting date
@@ -1029,6 +1065,32 @@ struct TournamentTeamDetailView: View {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+
+    // Helper for saving format to Firestore
+    private func saveFormat() {
+        let db = Firestore.firestore()
+        db.collection("tournaments_1")
+            .whereField("name", isEqualTo: teamName)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching document: \(error)")
+                    return
+                }
+                guard let document = snapshot?.documents.first else {
+                    print("Tournament not found")
+                    return
+                }
+                db.collection("tournaments_1").document(document.documentID).updateData([
+                    "league": selectedFormat
+                ]) { error in
+                    if let error = error {
+                        print("Error updating format: \(error)")
+                    } else {
+                        print("Format updated successfully")
+                    }
+                }
+            }
     }
 }
 
@@ -1047,3 +1109,4 @@ struct NotificationsView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+

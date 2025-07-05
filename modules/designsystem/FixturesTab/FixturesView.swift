@@ -460,6 +460,9 @@ struct TournamentTeamDetailView: View {
     // Added for Start Date picker
     @State private var showStartDatePicker = false
     @State private var startDate: Date? = nil
+    // Added for Start Time picker
+    @State private var showStartTimePicker = false
+    @State private var startTime: Date? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -536,6 +539,19 @@ struct TournamentTeamDetailView: View {
                                                     .foregroundColor(.white)
                                                 Spacer()
                                                 Text(startDate != nil ? formattedDate(startDate!) : "Not Set")
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    } else if item == "Start Time" {
+                                        Button(action: {
+                                            showStartTimePicker = true
+                                        }) {
+                                            HStack {
+                                                Text("Start Time")
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Text(startTime != nil ? formattedTime(startTime!) : "Not Set")
                                                     .foregroundColor(.gray)
                                             }
                                             .padding(.horizontal)
@@ -669,6 +685,86 @@ struct TournamentTeamDetailView: View {
 
                 Button("Done") {
                     showStartDatePicker = false
+                    if let selectedDate = startDate {
+                        let db = Firestore.firestore()
+                        db.collection("tournaments_1")
+                            .whereField("name", isEqualTo: teamName)
+                            .getDocuments { snapshot, error in
+                                if let error = error {
+                                    print("Error fetching document: \(error)")
+                                    return
+                                }
+                                guard let document = snapshot?.documents.first else {
+                                    print("Tournament not found")
+                                    return
+                                }
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "yyyy-MM-dd"
+                                let formattedDate = formatter.string(from: selectedDate)
+
+                                db.collection("tournaments_1").document(document.documentID).updateData([
+                                    "start_date": formattedDate
+                                ]) { error in
+                                    if let error = error {
+                                        print("Error updating start date: \(error)")
+                                    } else {
+                                        print("Start date updated successfully")
+                                    }
+                                }
+                            }
+                    }
+                }
+                .padding(.bottom, 30)
+            }
+            .padding()
+            .presentationDetents([.fraction(0.3)])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showStartTimePicker) {
+            VStack(spacing: 20) {
+                Text("Select Start Time")
+                    .font(.headline)
+                    .padding(.top)
+
+                DatePicker("",
+                           selection: Binding(
+                               get: { startTime ?? Date() },
+                               set: { startTime = $0 }
+                           ),
+                           displayedComponents: [.hourAndMinute])
+                    .datePickerStyle(WheelDatePickerStyle())
+                    .labelsHidden()
+
+                Button("Done") {
+                    showStartTimePicker = false
+                    if let selectedTime = startTime {
+                        let db = Firestore.firestore()
+                        db.collection("tournaments_1")
+                            .whereField("name", isEqualTo: teamName)
+                            .getDocuments { snapshot, error in
+                                if let error = error {
+                                    print("Error fetching document: \(error)")
+                                    return
+                                }
+                                guard let document = snapshot?.documents.first else {
+                                    print("Tournament not found")
+                                    return
+                                }
+                                let formatter = DateFormatter()
+                                formatter.dateFormat = "HH:mm"
+                                let formattedTime = formatter.string(from: selectedTime)
+
+                                db.collection("tournaments_1").document(document.documentID).updateData([
+                                    "start_time": formattedTime
+                                ]) { error in
+                                    if let error = error {
+                                        print("Error updating start time: \(error)")
+                                    } else {
+                                        print("Start time updated successfully")
+                                    }
+                                }
+                            }
+                    }
                 }
                 .padding(.bottom, 30)
             }
@@ -682,6 +778,13 @@ struct TournamentTeamDetailView: View {
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+
+    // Helper for formatting time
+    private func formattedTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 }
